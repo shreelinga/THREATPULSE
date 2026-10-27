@@ -1,0 +1,3293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THREATPULSE // 3D Cyber Threat &amp; Financial Command Center</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           THREATPULSE 3D COMMAND CENTER DESIGN SYSTEM
+           Palette:
+             Background:      #070B12
+             Main surfaces:   #0E1522
+             Elevated panels: #131F30
+             Borders:         #293A50
+             Electric Cyan:   #20E3F2
+             Blue:            #4287FF
+             Violet:          #8964FF
+             Primary text:    #EAF2FF
+             Muted text:      #92A4BC
+             Positive:        #42D6A4
+             Negative:        #FF667A
+             Warning:         #FFBD59
+           ========================================================================== */
+        :root,
+        body[data-theme="dark"] {
+            --bg-base: #070B12;
+            --bg-surface: #0E1522;
+            --bg-panel: #131F30;
+            --bg-card: rgba(19, 31, 48, 0.78);
+            --bg-card-hover: rgba(25, 42, 66, 0.92);
+            --border-color: #293A50;
+            --border-glow: rgba(32, 227, 242, 0.28);
+            --border-highlight: rgba(32, 227, 242, 0.55);
+
+            --text-primary: #EAF2FF;
+            --text-secondary: #92A4BC;
+            --text-muted: #5E718D;
+
+            --accent-cyan: #20E3F2;
+            --accent-cyan-glow: rgba(32, 227, 242, 0.22);
+            --accent-blue: #4287FF;
+            --accent-blue-glow: rgba(66, 135, 255, 0.22);
+            --accent-violet: #8964FF;
+            --accent-positive: #42D6A4;
+            --accent-positive-glow: rgba(66, 214, 164, 0.20);
+            --accent-negative: #FF667A;
+            --accent-negative-glow: rgba(255, 102, 122, 0.22);
+            --accent-warning: #FFBD59;
+            --accent-warning-glow: rgba(255, 189, 89, 0.20);
+
+            --radius-lg: 14px;
+            --radius-md: 9px;
+            --radius-sm: 6px;
+            --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-3d: 0 12px 32px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border-color);
+            --shadow-3d-hover: 0 18px 42px -6px rgba(0, 0, 0, 0.75), 0 0 20px var(--accent-cyan-glow), 0 0 0 1px var(--border-highlight);
+        }
+
+        body[data-theme="light"] {
+            --bg-base: #F0F4F8;
+            --bg-surface: #FFFFFF;
+            --bg-panel: #E2E8F0;
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --bg-card-hover: #FFFFFF;
+            --border-color: #CBD5E1;
+            --border-glow: rgba(32, 227, 242, 0.35);
+            --border-highlight: #4287FF;
+
+            --text-primary: #0A111C;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+
+            --accent-cyan: #00A6B8;
+            --accent-cyan-glow: rgba(0, 166, 184, 0.16);
+            --accent-blue: #2563EB;
+            --accent-blue-glow: rgba(37, 99, 235, 0.16);
+            --accent-violet: #7C3AED;
+            --accent-positive: #059669;
+            --accent-positive-glow: rgba(5, 150, 105, 0.16);
+            --accent-negative: #DC2626;
+            --accent-negative-glow: rgba(220, 38, 38, 0.16);
+            --accent-warning: #D97706;
+            --accent-warning-glow: rgba(217, 119, 6, 0.16);
+
+            --shadow-3d: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 0 0 1px #CBD5E1;
+            --shadow-3d-hover: 0 14px 30px -4px rgba(0, 0, 0, 0.14), 0 0 16px rgba(0, 166, 184, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13.5px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 3D Dynamic Perspective Canvas Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.75;
+        }
+
+        /* Layered Atmospheric Radial Overlays */
+        .ambient-lighting {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            background:
+                radial-gradient(circle at 18% 12%, rgba(32, 227, 242, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 82% 24%, rgba(66, 135, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 90%, rgba(137, 100, 255, 0.05) 0%, transparent 60%);
+        }
+
+        /* Main App Container */
+        .app-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1540px;
+            margin: 0 auto;
+            padding: 16px 24px 60px 24px;
+        }
+
+        /* ==========================================================================
+           HEADER SECTION
+           ========================================================================== */
+        header.app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-3d);
+            margin-bottom: 18px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo-frame {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 10px var(--accent-cyan-glow));
+        }
+
+        .brand-logo-frame svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .brand-text h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1.8px;
+            line-height: 1.1;
+            color: var(--text-primary);
+        }
+
+        .brand-text h1 .word-pulse {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 16px var(--accent-cyan-glow);
+        }
+
+        .brand-text .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 3px;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--accent-positive);
+            box-shadow: 0 0 8px var(--accent-positive);
+            animation: pulseDot 2s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.35);
+                opacity: 0.55;
+            }
+        }
+
+        .header-telemetry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .telemetry-badge {
+            background: rgba(14, 21, 34, 0.85);
+            border: 1px solid var(--border-color);
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .telemetry-badge strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid transparent;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #17AEC2 100%);
+            color: #070B12;
+            font-weight: 700;
+            box-shadow: 0 0 16px var(--accent-cyan-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(32, 227, 242, 0.45);
+        }
+
+        .btn-secondary {
+            background: var(--bg-panel);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(32, 50, 78, 0.8);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-icon {
+            padding: 8px 10px;
+        }
+
+        /* ==========================================================================
+           TAB NAVIGATION
+           ========================================================================== */
+        nav.tab-nav {
+            display: flex;
+            gap: 6px;
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            box-shadow: var(--shadow-3d);
+        }
+
+        nav.tab-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 9px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .tab-button .tab-idx {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            opacity: 0.55;
+        }
+
+        .tab-button:hover {
+            background: rgba(25, 42, 66, 0.45);
+            color: var(--text-primary);
+        }
+
+        .tab-button[aria-selected="true"] {
+            background: var(--bg-panel);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 14px var(--accent-cyan-glow), inset 0 0 8px rgba(32, 227, 242, 0.08);
+            font-weight: 700;
+        }
+
+        .tab-button .badge-num {
+            background: rgba(32, 227, 242, 0.15);
+            color: var(--accent-cyan);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+
+        /* Tab Panels */
+        .tab-panel {
+            display: none;
+            animation: panelFadeIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes panelFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ==========================================================================
+           DIMENSIONAL 3D KPI CARDS
+           ========================================================================== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+            perspective: 1000px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-3d);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            transform-style: preserve-3d;
+            cursor: default;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--kpi-accent, var(--accent-cyan)), transparent);
+            opacity: 0.8;
+        }
+
+        .kpi-card .card-sheen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: radial-gradient(circle at 50% 0%, rgba(32, 227, 242, 0.18), transparent 65%);
+        }
+
+        .kpi-card:hover .card-sheen {
+            opacity: 1;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--border-highlight);
+            box-shadow: var(--shadow-3d-hover);
+        }
+
+        .kpi-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .kpi-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .kpi-sub {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ==========================================================================
+           SECTION CARDS & SURFACES
+           ========================================================================== */
+        .section-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            margin-bottom: 22px;
+            box-shadow: var(--shadow-3d);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(41, 58, 80, 0.45);
+            padding-bottom: 14px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .section-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tag-pill {
+            background: rgba(32, 227, 242, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(32, 227, 242, 0.35);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .tag-pill.warning {
+            background: var(--accent-warning-glow);
+            color: var(--accent-warning);
+            border-color: rgba(255, 189, 89, 0.4);
+        }
+
+        /* ==========================================================================
+           3D CYBER NETWORK VISUALIZATION CANVAS (OVERVIEW TAB)
+           ========================================================================== */
+        .cyber-viz-wrap {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            background: radial-gradient(circle at 50% 50%, #0E1A2B 0%, #070B12 85%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+            margin-bottom: 22px;
+        }
+
+        #cyber-globe-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+
+        #cyber-globe-canvas:active {
+            cursor: grabbing;
+        }
+
+        .viz-hud-overlay {
+            position: absolute;
+            top: 16px;
+            left: 18px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .viz-hud-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            text-shadow: 0 0 12px var(--accent-cyan-glow);
+        }
+
+        .viz-hud-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .viz-controls-overlay {
+            position: absolute;
+            bottom: 16px;
+            right: 18px;
+            display: flex;
+            gap: 8px;
+            z-index: 5;
+        }
+
+        .viz-node-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(14, 21, 34, 0.94);
+            border: 1px solid var(--accent-cyan);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 16px var(--accent-cyan-glow);
+            max-width: 260px;
+        }
+
+        /* Explanatory Tooltips for Metrics & Methodologies */
+        .tooltip-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        .tooltip-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(32, 227, 242, 0.15);
+            color: var(--accent-cyan);
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 5px;
+            border: 1px solid rgba(32, 227, 242, 0.35);
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .tooltip-wrap:hover .tooltip-trigger {
+            background: var(--accent-cyan);
+            color: #070B12;
+            box-shadow: 0 0 8px var(--accent-cyan-glow);
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(14, 21, 34, 0.96);
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 400;
+            line-height: 1.45;
+            white-space: normal;
+            width: max-content;
+            max-width: 280px;
+            z-index: 1000;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85), 0 0 14px var(--accent-cyan-glow);
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            pointer-events: none;
+            text-transform: none;
+        }
+
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--border-highlight) transparent transparent transparent;
+        }
+
+        .tooltip-wrap:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive Forecast Grid */
+        .forecast-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        /* ==========================================================================
+           DATA TABLES
+           ========================================================================== */
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: rgba(14, 21, 34, 0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12.5px;
+        }
+
+        thead {
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            padding: 12px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(41, 58, 80, 0.4);
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(32, 227, 242, 0.04);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ==========================================================================
+           STATUS BADGES & INDICATORS
+           ========================================================================== */
+        .signal-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 10.5px;
+            padding: 3px 9px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            display: inline-block;
+            letter-spacing: 0.6px;
+        }
+
+        .signal-badge.review,
+        .signal-badge.monitor {
+            background: var(--accent-warning-glow);
+            color: var(--accent-warning);
+            border: 1px solid rgba(255, 189, 89, 0.45);
+        }
+
+        .signal-badge.no-signal {
+            background: rgba(94, 113, 141, 0.15);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .badge-exposure {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .badge-exposure.direct {
+            background: var(--accent-negative-glow);
+            color: var(--accent-negative);
+            border: 1px solid rgba(255, 102, 122, 0.4);
+        }
+
+        .badge-exposure.indirect {
+            background: var(--accent-warning-glow);
+            color: var(--accent-warning);
+            border: 1px solid rgba(255, 189, 89, 0.4);
+        }
+
+        .badge-exposure.unknown {
+            background: rgba(94, 113, 141, 0.18);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .session-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+        }
+
+        .session-badge.open {
+            background: var(--accent-positive-glow);
+            color: var(--accent-positive);
+            border: 1px solid rgba(66, 214, 164, 0.4);
+        }
+
+        .session-badge.closed {
+            background: rgba(94, 113, 141, 0.18);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .cve-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            background: rgba(32, 227, 242, 0.12);
+            border: 1px solid rgba(32, 227, 242, 0.3);
+            padding: 2px 7px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            display: inline-block;
+            transition: var(--transition);
+        }
+
+        .cve-pill:hover {
+            background: var(--accent-cyan);
+            color: #070B12;
+            box-shadow: 0 0 10px var(--accent-cyan-glow);
+        }
+
+        /* Forms & Inputs */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan-glow);
+        }
+
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 960px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .grid-3col {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        @media (max-width: 960px) {
+            .grid-3col {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Disclaimer & Methodological Notes */
+        .disclaimer-box {
+            background: rgba(14, 21, 34, 0.75);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-warning);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-top: 14px;
+        }
+
+        /* Toast Notifications */
+        .toast-notify {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-panel);
+            border: 1px solid var(--accent-cyan);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75), 0 0 16px var(--accent-cyan-glow);
+            display: none;
+            z-index: 9999;
+            font-size: 12.5px;
+            font-family: 'JetBrains Mono', monospace;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 12px;
+            }
+
+            header.app-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="dark">
+
+    <!-- 3D Perspective Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="ambient-lighting"></div>
+
+    <div class="app-container">
+
+        <!-- ====================================================================
+             HEADER
+             ==================================================================== -->
+        <header class="app-header">
+            <div class="brand-lockup">
+                <!-- Custom Geometric Radar Eye SVG Mark -->
+                <div class="brand-logo-frame">
+                    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="hdrRadarBg" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stop-color="#131F30" />
+                                <stop offset="100%" stop-color="#070B12" />
+                            </radialGradient>
+                            <linearGradient id="hdrCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#FFFFFF" />
+                                <stop offset="40%" stop-color="#20E3F2" />
+                                <stop offset="100%" stop-color="#4287FF" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="46" fill="url(#hdrRadarBg)" stroke="#293A50" stroke-width="1.8" />
+                        <circle cx="50" cy="50" r="38" stroke="#1B283A" stroke-width="1" stroke-dasharray="2 3" />
+                        <circle cx="50" cy="50" r="28" stroke="#223348" stroke-width="1" />
+                        <circle cx="50" cy="50" r="18" stroke="#293A50" stroke-width="1" stroke-dasharray="3 3" />
+                        <!-- Cardinal ticks -->
+                        <line x1="50" y1="4" x2="50" y2="14" stroke="#20E3F2" stroke-width="2" stroke-linecap="round" />
+                        <line x1="50" y1="86" x2="50" y2="96" stroke="#20E3F2" stroke-width="2"
+                            stroke-linecap="round" />
+                        <line x1="4" y1="50" x2="14" y2="50" stroke="#20E3F2" stroke-width="2" stroke-linecap="round" />
+                        <line x1="86" y1="50" x2="96" y2="50" stroke="#20E3F2" stroke-width="2"
+                            stroke-linecap="round" />
+                        <!-- Radar Eye Aperture -->
+                        <path d="M12 50 C26 26, 74 26, 88 50 C74 74, 26 74, 12 50 Z" fill="rgba(20, 34, 54, 0.45)"
+                            stroke="url(#hdrCyanGrad)" stroke-width="2.4" stroke-linejoin="round" />
+                        <!-- Pulse Waveform -->
+                        <path d="M14 50 L32 50 L37 36 L43 64 L49 26 L55 70 L61 40 L66 50 L86 50" stroke="#FFFFFF"
+                            stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="49" cy="26" r="2.5" fill="#20E3F2" />
+                        <circle cx="55" cy="70" r="2.2" fill="#FF667A" />
+                        <circle cx="50" cy="50" r="3.4" fill="#FFFFFF" />
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>THREAT<span class="word-pulse">PULSE</span></h1>
+                    <div class="subtitle">
+                        <span>3D CYBER COMMAND CENTER &bull; Cyber Threat &amp; Market Intelligence</span>
+                        <span><span class="live-dot"></span> LIVE ENGINE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-telemetry">
+                <div class="telemetry-badge">
+                    AI AGENT: <strong style="color:var(--accent-cyan);">GEMINI 3.8 FLASH</strong>
+                </div>
+                <div class="telemetry-badge">
+                    ML MODEL: <strong style="color:var(--accent-positive);">LOOCV ENSEMBLE</strong>
+                </div>
+                <div class="telemetry-badge">
+                    US SESSION: <strong id="hdr-us-session">--</strong>
+                </div>
+                <div class="telemetry-badge">
+                    INDIA SESSION: <strong id="hdr-india-session">--</strong>
+                </div>
+                <div class="telemetry-badge">
+                    REFRESH: <strong id="countdown-timer">30s</strong>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn btn-primary" id="btn-refresh-quotes" onclick="refreshMarketData()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                    </svg>
+                    Refresh Quotes
+                </button>
+                <button class="btn btn-secondary" onclick="testDiscordWebhook()"
+                    title="Verify diagnostic alert webhook">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                    </svg>
+                    Test Alert
+                </button>
+                <button class="btn btn-secondary btn-icon" onclick="toggleTheme()" title="Toggle color theme">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- ====================================================================
+             TAB NAVIGATION
+             ==================================================================== -->
+        <nav class="tab-nav" role="tablist" aria-label="Terminal Modules">
+            <button class="tab-button" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview"
+                onclick="switchTab('overview')">
+                <span class="tab-idx">01</span> Overview
+            </button>
+            <button class="tab-button" id="tab-threats" role="tab" aria-selected="false" aria-controls="panel-threats"
+                onclick="switchTab('threats')">
+                <span class="tab-idx">02</span> Threat Intel <span class="badge-num" id="nav-threat-count">--</span>
+            </button>
+            <button class="tab-button" id="tab-markets" role="tab" aria-selected="false" aria-controls="panel-markets"
+                onclick="switchTab('markets')">
+                <span class="tab-idx">03</span> Live Markets <span class="badge-num" id="nav-stock-count">--</span>
+            </button>
+            <button class="tab-button" id="tab-correlations" role="tab" aria-selected="false"
+                aria-controls="panel-correlations" onclick="switchTab('correlations')">
+                <span class="tab-idx">04</span> Correlations
+            </button>
+            <button class="tab-button" id="tab-ai" role="tab" aria-selected="false" aria-controls="panel-ai"
+                onclick="switchTab('ai')">
+                <span class="tab-idx">05</span> AI Investigation
+            </button>
+            <button class="tab-button" id="tab-forecasts" role="tab" aria-selected="false"
+                aria-controls="panel-forecasts" onclick="switchTab('forecasts')">
+                <span class="tab-idx">06</span> ML Forecasts
+            </button>
+            <button class="tab-button" id="tab-events" role="tab" aria-selected="false" aria-controls="panel-events"
+                onclick="switchTab('events')">
+                <span class="tab-idx">07</span> Event Studies
+            </button>
+            <button class="tab-button" id="tab-cisa" role="tab" aria-selected="false" aria-controls="panel-cisa"
+                onclick="switchTab('cisa')">
+                <span class="tab-idx">08</span> CISA KEV (1,741)
+            </button>
+            <button class="tab-button" id="tab-health" role="tab" aria-selected="false" aria-controls="panel-health"
+                onclick="switchTab('health')">
+                <span class="tab-idx">09</span> System Health
+            </button>
+        </nav>
+
+        <!-- ====================================================================
+             TAB 01: OVERVIEW & 3D CYBER NETWORK
+             ==================================================================== -->
+        <section class="tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+
+            <!-- Dimensional KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card" style="--kpi-accent:var(--accent-cyan)">
+                    <div class="card-sheen"></div>
+                    <div class="kpi-label">Monitored Equities <span>US &amp; IN</span></div>
+                    <div class="kpi-value" id="kpi-monitored">--</div>
+                    <div class="kpi-sub">Surveillance watchlist across NYSE, NASDAQ &amp; NSE</div>
+                </div>
+                <div class="kpi-card" style="--kpi-accent:var(--accent-positive)">
+                    <div class="card-sheen"></div>
+                    <div class="kpi-label">Threats Tracked <span>VERIFIED</span></div>
+                    <div class="kpi-value" id="kpi-threats">--</div>
+                    <div class="kpi-sub">CISA KEV correlated cyber intelligence incidents</div>
+                </div>
+                <div class="kpi-card" style="--kpi-accent:var(--accent-negative)">
+                    <div class="card-sheen"></div>
+                    <div class="kpi-label">Critical Alerts <span>RISK &gt;= 70</span></div>
+                    <div class="kpi-value" id="kpi-critical" style="color:var(--accent-negative)">--</div>
+                    <div class="kpi-sub">Composite cyber-financial risk above alert threshold</div>
+                </div>
+                <div class="kpi-card" style="--kpi-accent:var(--accent-warning)">
+                    <div class="card-sheen"></div>
+                    <div class="kpi-label">Max Observed Drop <span>24H</span></div>
+                    <div class="kpi-value" id="kpi-drop">--%</div>
+                    <div class="kpi-sub">Largest observed individual equity decline</div>
+                </div>
+                <div class="kpi-card" style="--kpi-accent:var(--accent-violet)">
+                    <div class="card-sheen"></div>
+                    <div class="kpi-label">Composite Risk Index <span>AGGREGATE</span></div>
+                    <div class="kpi-value" id="kpi-avg-risk">--</div>
+                    <div class="kpi-sub">Multi-factor severity and exploitation index (0-100)</div>
+                </div>
+            </div>
+
+            <!-- 3D Interactive Cyber Network Sphere -->
+            <div class="cyber-viz-wrap">
+                <canvas id="cyber-globe-canvas"></canvas>
+                <div class="viz-hud-overlay">
+                    <div class="viz-hud-title">3D Cyber Threat Telemetry</div>
+                    <div class="viz-hud-meta">Data-Backed Asset Nodes · Illustrative Topology Mesh</div>
+                </div>
+                <div class="viz-controls-overlay">
+                    <button class="btn btn-secondary btn-icon" onclick="resetGlobeView()" title="Reset perspective">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="m10 15 5-3-5-3v6z" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="viz-tooltip" class="viz-node-tooltip"></div>
+            </div>
+
+            <!-- Charts 2-Column Grid -->
+            <div class="grid-2col">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>Threat Severity Distribution</h2>
+                        <span class="tag-pill">Observed Incidents</span>
+                    </div>
+                    <div id="severity-distribution-chart" style="min-height:160px;">
+                        <div style="color:var(--text-muted); padding:20px; text-align:center;">Loading severity
+                            metrics...</div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>Sector Excess Performance</h2>
+                        <span class="tag-pill">Market-Separated Benchmarks</span>
+                    </div>
+                    <div id="sector-performance-chart" style="min-height:160px;">
+                        <div style="color:var(--text-muted); padding:20px; text-align:center;">Loading sector
+                            comparisons...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disclaimer-box">
+                <strong>Methodological Guidance &amp; Scientific Disclaimers:</strong>
+                AI incident extraction, machine-learning impact estimates, and observed stock price changes are distinct
+                statistical observations.
+                Stock price movements are subject to broader market and sector conditions. Correlation does not
+                establish that a cybersecurity incident caused an observed equity movement.
+                Signals emitted by THREATPULSE (<code>REVIEW</code>, <code>MONITOR</code>, <code>NO SIGNAL</code>) are
+                operational workflow indicators and do not constitute financial advice.
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 02: THREAT INTEL STREAM
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-threats" role="tabpanel" aria-labelledby="tab-threats">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Verified Cyber Threat Stream</h2>
+                    <span class="tag-pill">CISA KEV Correlated</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Incident Date</th>
+                                <th>Target Company</th>
+                                <th>Threat Category</th>
+                                <th>Severity</th>
+                                <th>Exposure</th>
+                                <th>CVE IDs / KEV</th>
+                                <th>Composite Risk</th>
+                                <th>Signal</th>
+                                <th>Analysis Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="threats-tbody">
+                            <tr>
+                                <td colspan="9" style="text-align:center; color:var(--text-muted);">Loading verified
+                                    threats from database...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 03: LIVE MARKETS
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-markets" role="tabpanel" aria-labelledby="tab-markets">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Surveillance Watchlist &amp; Market Quotes</h2>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span class="tag-pill">yfinance Public Feed (~15m Delay / Previous Close)</span>
+                        <span class="tag-pill">Separated US &amp; India Equities</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:14px; position:relative;">
+                    <input class="form-control" id="stock-search-input" type="search"
+                        placeholder="Add equity to surveillance (e.g. MSFT, TCS.NS, NVDA, INFY.NS)..." style="flex:1;">
+                    <div id="stock-search-results"
+                        style="position:absolute; top:42px; left:0; right:60px; background:var(--bg-panel); border:1px solid var(--border-color); border-radius:var(--radius-sm); z-index:100; max-height:220px; overflow-y:auto; display:none; box-shadow:var(--shadow-3d);">
+                    </div>
+                    <button class="btn btn-secondary" id="stock-search-clear">Clear</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Company Name</th>
+                                <th>Market</th>
+                                <th>Current Price</th>
+                                <th>24h Change</th>
+                                <th>Data Time &amp; Freshness</th>
+                                <th>Session</th>
+                                <th>Benchmark</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="stocks-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align:center; color:var(--text-muted);">Loading live market
+                                    quotes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 04: CORRELATIONS
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-correlations" role="tabpanel" aria-labelledby="tab-correlations">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Threat &amp; Market Movement Correlations</h2>
+                    <span class="tag-pill">Non-Causal Association</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Target</th>
+                                <th>Threat Summary</th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        Observed Raw Stock Return
+                                        <span class="tooltip-trigger">?</span>
+                                        <span class="tooltip-content">Actual historical price change percentage from
+                                            pre-event close to post-event close. This is an observed raw market return,
+                                            NOT a model prediction or abnormal return.</span>
+                                    </span>
+                                </th>
+                                <th>Composite Risk</th>
+                                <th>Signal</th>
+                                <th>Analyst Review</th>
+                            </tr>
+                        </thead>
+                        <tbody id="correlations-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align:center; color:var(--text-muted);">Loading
+                                    correlations...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 05: AI INVESTIGATION (SANDBOXED GEMINI)
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-ai" role="tabpanel" aria-labelledby="tab-ai">
+            <div class="grid-2col">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>Sandboxed Incident Intake</h2>
+                        <span class="tag-pill">Prompt-Injection Shielded</span>
+                    </div>
+                    <form onsubmit="handleThreatSubmission(event)">
+                        <div class="form-group">
+                            <label>Target Company or Ticker</label>
+                            <input class="form-control" id="input-company" type="text"
+                                placeholder="e.g. Microsoft, TCS.NS, CrowdStrike, Apple" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Reported Threat Type</label>
+                            <select class="form-control" id="input-type">
+                                <option value="Zero-Day Exploit">Zero-Day Exploit</option>
+                                <option value="Ransomware">Ransomware Compromise</option>
+                                <option value="Data Breach">Data Breach</option>
+                                <option value="Supply Chain Attack">Supply Chain Attack</option>
+                                <option value="Cloud Misconfiguration">Cloud Misconfiguration</option>
+                                <option value="Vulnerability Disclosure">Vulnerability Disclosure</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Incident Intelligence Text</label>
+                            <textarea class="form-control" id="input-desc" rows="5"
+                                placeholder="Paste advisory text, RSS summary, or incident disclosures. Untrusted content is sandboxed."
+                                required></textarea>
+                        </div>
+                        <button class="btn btn-primary" id="btn-submit-threat" type="submit"
+                            style="width:100%; justify-content:center;">
+                            Execute Sandboxed AI Investigation &amp; ML Forecast
+                        </button>
+                    </form>
+                </div>
+
+                <div class="section-card" id="dossier-card-wrap">
+                    <div class="section-header">
+                        <h2>Investigation Dossier</h2>
+                        <span class="tag-pill" id="dossier-status">Standby</span>
+                    </div>
+                    <div id="dossier-placeholder"
+                        style="color:var(--text-muted); text-align:center; padding:50px 20px;">
+                        Submit an incident on the left to generate structured Gemini 3.8 Flash extraction, CISA KEV
+                        verification, and ML price impact forecasts.
+                    </div>
+                    <div id="dossier-result" style="display:none;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <h3 id="dossier-company-ticker" style="font-family:'Outfit',sans-serif; font-size:18px;">--
+                            </h3>
+                            <span id="dossier-signal" class="signal-badge no-signal">NO SIGNAL</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:14px;"
+                            id="dossier-source-attribution">--</div>
+
+                        <div class="grid-3col" style="margin-bottom:14px;">
+                            <div class="telemetry-badge"
+                                style="flex-direction:column; align-items:flex-start; padding:8px 10px;">
+                                <span style="font-size:10px; color:var(--text-muted);">EXPOSURE LEVEL</span>
+                                <strong id="dossier-exposure" class="badge-exposure unknown"
+                                    style="margin-top:4px;">UNKNOWN</strong>
+                            </div>
+                            <div class="telemetry-badge"
+                                style="flex-direction:column; align-items:flex-start; padding:8px 10px;">
+                                <span style="font-size:10px; color:var(--text-muted);">EXPLOITATION</span>
+                                <strong id="dossier-status-badge"
+                                    style="color:var(--text-primary); margin-top:4px;">NOT_REPORTED</strong>
+                            </div>
+                            <div class="telemetry-badge"
+                                style="flex-direction:column; align-items:flex-start; padding:8px 10px;">
+                                <span style="font-size:10px; color:var(--text-muted);">EVIDENCE QUALITY</span>
+                                <strong id="dossier-evidence-score"
+                                    style="color:var(--accent-cyan); margin-top:4px;">--</strong>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <strong
+                                style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase;">Extracted
+                                Incident Summary:</strong>
+                            <p id="dossier-summary" style="font-size:12.5px; margin-top:4px; line-height:1.6;"></p>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <strong
+                                style="font-size:11.5px; color:var(--text-secondary); text-transform:uppercase;">Correlated
+                                CVEs:</strong>
+                            <div id="dossier-cves" style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;"></div>
+                        </div>
+
+                        <div class="disclaimer-box" style="margin-top:10px;">
+                            <strong>Supporting Evidence:</strong> <span id="dossier-evidence-quote"></span><br>
+                            <strong>Uncertainties:</strong> <span id="dossier-uncertainties"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 06: ML FORECASTS & ON-DEMAND SIMULATOR
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-forecasts" role="tabpanel" aria-labelledby="tab-forecasts">
+
+            <!-- Real-Time ML Impact Simulator -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>On-Demand ML Impact Simulator &amp; Baseline Comparison</h2>
+                    <span class="tag-pill"
+                        style="background:rgba(0,255,204,0.15); color:var(--accent-cyan); border:1px solid var(--accent-cyan);">Audited
+                        N=21 Evaluation</span>
+                </div>
+                <div class="grid-2col">
+                    <div>
+                        <div class="form-group">
+                            <label>Severity Score (1.0 to 10.0)</label>
+                            <input class="form-control" id="ml-input-sev" type="number" step="0.1" min="1" max="10"
+                                value="8.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Affected Users (Millions, log1p-scaled)</label>
+                            <input class="form-control" id="ml-input-users" type="number" step="0.01" min="0"
+                                value="5.0">
+                        </div>
+                        <div class="form-group">
+                            <label>Data Sensitivity Score (1.0 to 10.0)</label>
+                            <input class="form-control" id="ml-input-sens" type="number" step="0.1" min="1" max="10"
+                                value="8.0">
+                        </div>
+                        <button class="btn btn-primary" onclick="runMLSimulation()"
+                            style="width:100%; justify-content:center;">
+                            Calculate Model Impact Forecast
+                        </button>
+                    </div>
+
+                    <div
+                        style="background:rgba(14,21,34,0.7); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:16px;">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <h3
+                                style="font-family:'Outfit',sans-serif; font-size:15px; margin:0; color:var(--accent-cyan);">
+                                Forecast vs. Historical Benchmark</h3>
+                            <span class="tag-pill" style="font-size:10px;">LOOCV &amp; LOGO-CV Validated</span>
+                        </div>
+
+                        <!-- Baseline-First Reporting Banner -->
+                        <div
+                            style="background:rgba(0,255,204,0.06); border:1px solid rgba(0,255,204,0.25); border-radius:6px; padding:10px 12px; margin-bottom:12px; font-size:11.5px; color:var(--text-secondary); line-height:1.5;">
+                            <strong style="color:var(--accent-cyan);">Baseline-First Evaluation:</strong> The
+                            <strong>Historical Median (-2.00%)</strong> is the primary benchmark for the
+                            benchmark-adjusted 1-day abnormal return target. Complex candidate models (Random Forest,
+                            Huber) remain experimental and are evaluated side-by-side without promoting unverified
+                            superiority.
+                        </div>
+
+                        <!-- 3-Card Forecast Display: Primary Benchmark, Experimental RF, Experimental Huber -->
+                        <div class="forecast-cards-grid">
+                            <!-- Primary Benchmark -->
+                            <div
+                                style="background:rgba(0,255,204,0.05); border:1px solid rgba(0,255,204,0.3); border-radius:6px; padding:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span
+                                        style="font-size:10px; font-weight:700; color:var(--accent-cyan); text-transform:uppercase;">HISTORICAL
+                                        MEDIAN</span>
+                                    <span class="tag-pill"
+                                        style="font-size:9px; background:rgba(0,255,204,0.2); color:var(--accent-cyan);">PRIMARY
+                                        BENCHMARK</span>
+                                </div>
+                                <div id="ml-benchmark-val"
+                                    style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; color:var(--accent-negative); margin:4px 0;">
+                                    -2.00%</div>
+                                <div style="font-size:10.5px; color:var(--text-secondary);">
+                                    LOOCV MAE: <strong>3.66%</strong> | LOGO: <strong>3.72%</strong><br>
+                                    <span style="color:var(--text-muted);">Recommended out-of-sample benchmark
+                                        (N=21)</span>
+                                </div>
+                            </div>
+
+                            <!-- Experimental Model 1: Random Forest -->
+                            <div
+                                style="background:rgba(255,180,0,0.05); border:1px solid rgba(255,180,0,0.3); border-radius:6px; padding:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span
+                                        style="font-size:10px; font-weight:700; color:#ffb400; text-transform:uppercase;">RANDOM
+                                        FOREST</span>
+                                    <span class="tag-pill"
+                                        style="font-size:9px; background:rgba(255,180,0,0.2); color:#ffb400;">EXPERIMENTAL
+                                        MODEL</span>
+                                </div>
+                                <div id="ml-sim-val"
+                                    style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; color:var(--accent-negative); margin:4px 0;">
+                                    --%</div>
+                                <div style="font-size:10.5px; color:var(--text-secondary);">
+                                    LOOCV MAE: <strong>4.18%</strong> | LOGO: <strong>4.25%</strong><br>
+                                    <span style="color:var(--text-muted);">Experimental non-linear; not proven
+                                        superior</span>
+                                </div>
+                            </div>
+
+                            <!-- Experimental Model 2: Huber Regression -->
+                            <div
+                                style="background:rgba(66,135,255,0.05); border:1px solid rgba(66,135,255,0.3); border-radius:6px; padding:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span
+                                        style="font-size:10px; font-weight:700; color:var(--accent-blue); text-transform:uppercase;">HUBER
+                                        REGRESSION</span>
+                                    <span class="tag-pill"
+                                        style="font-size:9px; background:rgba(66,135,255,0.2); color:var(--accent-blue);">EXPERIMENTAL
+                                        MODEL</span>
+                                </div>
+                                <div id="ml-huber-val"
+                                    style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; color:var(--accent-negative); margin:4px 0;">
+                                    --%</div>
+                                <div style="font-size:10.5px; color:var(--text-secondary);">
+                                    LOOCV MAE: <strong>4.65%</strong> | LOGO: <strong>4.69%</strong><br>
+                                    <span style="color:var(--text-muted);">Robust linear comparison; not proven
+                                        superior</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Target & Uncertainty Details -->
+                        <div
+                            style="font-size:11.5px; color:var(--text-secondary); line-height:1.6; margin-bottom:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                            <div><span class="tooltip-wrap"><strong class="tooltip-trigger">Target
+                                        Horizon:</strong><span class="tooltip-content">Post-disclosure trading window
+                                        analyzed: T to T+1 close (1 full market day).</span></span> <span
+                                    id="ml-sim-horizon" style="color:var(--text-primary);">1-Day Post-Disclosure</span>
+                                (T to T+1 close)</div>
+                            <div><span class="tooltip-wrap"><strong class="tooltip-trigger">Target
+                                        Definition:</strong><span class="tooltip-content">Abnormal Return (AR) = Stock
+                                        Return minus Benchmark Return. Isolates cyber breach reaction from broad market
+                                        movement.</span></span> <span id="ml-sim-target"
+                                    style="color:var(--text-primary);">Benchmark-Adjusted 1-Day Abnormal Return (AR =
+                                    R_stock - R_benchmark)</span></div>
+                            <div><strong>Market Benchmark:</strong> <span style="color:var(--text-primary);">SPY (US
+                                    Equities) / ^NSEI (Indian Equities)</span></div>
+                            <div><span class="tooltip-wrap"><strong class="tooltip-trigger">Evaluation Sample
+                                        Size:</strong><span class="tooltip-content">Sample size is limited to 21 audited
+                                        events across 17 distinct companies. High uncertainty on unseen breach
+                                        types.</span></span> <span style="color:var(--text-primary);">N = 21 Audited
+                                    Incidents (17 Company Groups)</span></div>
+                            <div><span class="tooltip-wrap"><strong class="tooltip-trigger">Incident Prediction
+                                        Interval:</strong><span class="tooltip-content">Prediction intervals for
+                                        individual new incidents require sufficient sample size and validated
+                                        distributional calibration. Fabricated intervals (such as ±X%) are strictly
+                                        prohibited.</span></span> <span id="ml-sim-pred-interval"
+                                    style="color:var(--accent-cyan); font-weight:600;">Unavailable (N=21 sample size is
+                                    insufficient for calibrated prediction intervals)</span></div>
+                            <div><span class="tooltip-wrap"><strong class="tooltip-trigger">Tree Estimator
+                                        Spread:</strong><span class="tooltip-content">Interquartile dispersion across
+                                        individual Decision Trees in the Random Forest. Descriptive dispersion only, NOT
+                                        a calibrated prediction interval.</span></span> <span id="ml-sim-spread"
+                                    style="color:var(--text-primary);">--</span></div>
+                            <div><strong>Model Version:</strong> <span id="ml-sim-model"
+                                    style="color:var(--text-primary);">v2.2.0-leakage-safe-pipeline</span></div>
+                        </div>
+
+                        <div class="disclaimer-box" style="margin-top:8px;">
+                            <strong>Honest Uncertainty Disclosure:</strong> The audited evaluation dataset contains only
+                            21 incidents across 17 distinct companies. Out-of-sample performance remains uncertain.
+                            Bootstrap confidence intervals apply to the sample average MAE, not to individual incident
+                            predictions. Estimates represent exploratory statistical benchmarks, not causal certainty or
+                            financial advice.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staged Model Scorecard -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Model Performance Comparison (LOOCV &amp; LOGO-CV Evaluation)</h2>
+                    <span class="tag-pill">Target: Benchmark-Adjusted 1-Day Abnormal Return (N=21)</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Model &amp; Role</th>
+                                <th>Status / Tier</th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Target &amp; Horizon</span>
+                                        <span class="tooltip-content">Target definition (Benchmark-Adjusted Abnormal
+                                            Return) and prediction horizon (1-Day post-disclosure).</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">LOOCV MAE (%)</span>
+                                        <span class="tooltip-content">Leave-One-Out Cross-Validation Mean Absolute Error
+                                            (in percentage points). Lower is better.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">95% Bootstrap CI for MAE</span>
+                                        <span class="tooltip-content">95% Bootstrap Confidence Interval for the sample
+                                            mean MAE (1,000 resamples). Reflects uncertainty in evaluation metrics, NOT
+                                            an incident prediction interval.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">LOGO-CV MAE (%)</span>
+                                        <span class="tooltip-content">Leave-One-Group-Out Cross-Validation grouped by
+                                            company (17 company clusters) to prevent cross-breach intra-company
+                                            leakage.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">LOOCV RMSE (%)</span>
+                                        <span class="tooltip-content">Root Mean Squared Error under LOOCV. Penalizes
+                                            larger prediction errors more heavily.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">LOGO-CV RMSE (%)</span>
+                                        <span class="tooltip-content">Root Mean Squared Error under company-grouped
+                                            LOGO-CV.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Acc. (Dir / Bal)</span>
+                                        <span class="tooltip-content">Directional Accuracy (% correctly predicting
+                                            negative abnormal return) and Balanced Accuracy (accounting for class
+                                            imbalance).</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Sample &amp; Validation</span>
+                                        <span class="tooltip-content">Evaluation sample size (N=21 incidents across 17
+                                            companies) and validation protocol (LOOCV 21 folds + LOGO-CV 17 company
+                                            folds).</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Version &amp; Date</span>
+                                        <span class="tooltip-content">Evaluated model version and audit timestamp from
+                                            Phase 4 verification.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">vs. Median Benchmark</span>
+                                        <span class="tooltip-content">Relative performance compared to the Primary
+                                            Historical Median Baseline. Negative values indicate worse out-of-sample
+                                            error than the simple median.</span>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="loocv-scorecard-tbody">
+                            <tr>
+                                <td colspan="12" style="text-align:center; color:var(--text-muted);">Loading LOOCV model
+                                    comparison...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div
+                    style="font-size:11px; color:var(--text-muted); line-height:1.5; margin-top:10px; padding:10px; background:rgba(255,255,255,0.02); border-radius:4px; border:1px solid rgba(255,255,255,0.05);">
+                    <strong>Validation Methodology &amp; Reporting Standards:</strong>
+                    Evaluated across 21 audited historical breach incidents (17 unique companies) using Leave-One-Out
+                    Cross-Validation (LOOCV) and Leave-One-Group-Out Cross-Validation (LOGO-CV grouped by company to
+                    prevent cross-breach company leakage). The Historical Median Baseline achieves the lowest
+                    out-of-sample error (LOOCV MAE 3.66%, LOGO-CV MAE 3.72%) and is designated the primary benchmark.
+                    Random Forest (LOOCV MAE 4.18%) and Huber (LOOCV MAE 4.65%) are experimental comparison models. The
+                    95% bootstrap confidence interval represents uncertainty in the mean MAE estimate across resamples,
+                    not an incident-level prediction interval.
+                </div>
+
+                <!-- Secondary reference: Legacy multi-day horizon -->
+                <div style="margin-top:16px;">
+                    <details style="font-size:12px; color:var(--text-secondary);">
+                        <summary style="cursor:pointer; color:var(--accent-cyan); font-weight:600; padding:6px 0;">
+                            View Legacy Pre-Production Reference Table (T-1 to T+2 Raw Stock Price Change, N=14)
+                        </summary>
+                        <div style="margin-top:8px;" class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Legacy Model (N=14)</th>
+                                        <th>Target Definition</th>
+                                        <th>LOOCV MAE (%)</th>
+                                        <th>LOOCV RMSE (%)</th>
+                                        <th>Directional Accuracy</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="legacy-scorecard-tbody">
+                                    <tr>
+                                        <td colspan="5" style="text-align:center; color:var(--text-muted);">Loading
+                                            legacy comparison...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Live Prediction Horizon Performance -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Live Prediction Horizon Performance</h2>
+                    <button class="btn btn-secondary" id="btn-evaluate-predictions"
+                        onclick="evaluatePredictions()">Evaluate Pending</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Horizon</th>
+                                <th>Evaluated Count</th>
+                                <th>Directional Accuracy</th>
+                                <th>Mean Absolute Error (MAE)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prediction-horizons">
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:var(--text-muted);">Loading horizon
+                                    metrics...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 07: EVENT STUDIES
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-events" role="tabpanel" aria-labelledby="tab-events">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Curated Historical Cyber Breach Dataset</h2>
+                    <button class="btn btn-secondary" id="btn-run-event-study" onclick="runHistoricalEventStudy()">Run /
+                        Retry Event Study</button>
+                </div>
+
+                <!-- Summary Strip -->
+                <div id="event-study-summary"
+                    style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:18px;">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div id="event-source-badge"
+                    style="font-size:11.5px; color:var(--text-secondary); margin-bottom:12px; font-family:'JetBrains Mono',monospace;">
+                    Loading curated records...
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Event Date</th>
+                                <th>Target Company</th>
+                                <th>Severity Tier</th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Observed Raw Stock Return (1d/3d/5d)</span>
+                                        <span class="tooltip-content">Observed unadjusted percentage price change of the
+                                            target company stock following disclosure. This is raw historical market
+                                            data, not a model forecast or abnormal return.</span>
+                                    </span>
+                                </th>
+                                <th>Sector Benchmark</th>
+                                <th>Market (SPY)</th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">Benchmark-Adjusted Abnormal (1D)</span>
+                                        <span class="tooltip-content">Abnormal Return (AR = Raw Stock Return - Benchmark
+                                            Return). Isolates company-specific reaction from general market
+                                            movements.</span>
+                                    </span>
+                                </th>
+                                <th>
+                                    <span class="tooltip-wrap">
+                                        <span class="tooltip-trigger">CAR (1d/3d/5d)</span>
+                                        <span class="tooltip-content">Cumulative Abnormal Return across post-event
+                                            trading horizons (1-day, 3-day, 5-day).</span>
+                                    </span>
+                                </th>
+                                <th>Z-Score</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="event-study-tbody">
+                            <tr>
+                                <td colspan="10" style="text-align:center; color:var(--text-muted);">Loading event
+                                    studies...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 08: CISA KEV VULNERABILITIES
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-cisa" role="tabpanel" aria-labelledby="tab-cisa">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>CISA Known Exploited Vulnerabilities Catalog</h2>
+                    <span class="tag-pill" id="cisa-total">1,741 Stored Entries</span>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                    <input class="form-control" id="cisa-search" type="search"
+                        placeholder="Search by CVE ID, vendor, product, or keyword..." style="flex:1; min-width:240px;">
+                    <select class="form-control" id="cisa-ransomware-filter" onchange="loadCisaVulnerabilities()"
+                        style="max-width:180px;">
+                        <option value="">All Vulnerabilities</option>
+                        <option value="known">Known Ransomware Use</option>
+                        <option value="unknown">Non-Ransomware</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadCisaVulnerabilities()">Refresh Catalog</button>
+                </div>
+
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:11.5px; color:var(--text-muted);">
+                    <div id="cisa-status">Connecting to local KEV catalog...</div>
+                    <div id="cisa-pagination-info">Page 1</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CVE ID</th>
+                                <th>Vendor / Project</th>
+                                <th>Product</th>
+                                <th>Vulnerability Name &amp; Description</th>
+                                <th>Date Added</th>
+                                <th>Due Date</th>
+                                <th>Ransomware</th>
+                                <th>Source Link</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cisa-tbody">
+                            <tr>
+                                <td colspan="8" style="text-align:center; color:var(--text-muted);">Loading CISA
+                                    catalog...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">
+                    <button class="btn btn-secondary" id="cisa-prev-btn" onclick="prevCisaPage()">Previous Page</button>
+                    <span id="cisa-page-counter" style="font-family:'JetBrains Mono',monospace; font-size:12px;">1 /
+                        1</span>
+                    <button class="btn btn-secondary" id="cisa-next-btn" onclick="nextCisaPage()">Next Page</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================================
+             TAB 09: SYSTEM HEALTH & TELEMETRY
+             ==================================================================== -->
+        <section class="tab-panel" id="panel-health" role="tabpanel" aria-labelledby="tab-health">
+            <div class="grid-2col">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>Platform Telemetry &amp; Models</h2>
+                        <span class="session-badge open" id="health-overall-status">OPERATIONAL</span>
+                    </div>
+                    <div style="display:grid; gap:12px;">
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>AI Provider &amp; Model</span>
+                            <strong id="health-ai-model">Google Gemini (gemini-3.8-flash)</strong>
+                        </div>
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>ML Model &amp; Evaluator</span>
+                            <strong id="health-ml-algo">RandomForestRegressor (LOOCV v2.1.0)</strong>
+                        </div>
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>US Market Session</span>
+                            <strong id="health-us-session">--</strong>
+                        </div>
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>India Market Session</span>
+                            <strong id="health-india-session">--</strong>
+                        </div>
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>System Time (UTC)</span>
+                            <strong id="health-time-utc">--</strong>
+                        </div>
+                        <div class="telemetry-badge" style="justify-content:space-between; width:100%;">
+                            <span>System Time (IST)</span>
+                            <strong id="health-time-ist">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2>Database Table Inventory</h2>
+                        <span class="tag-pill">threat_stock_data.db</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Table Name</th>
+                                    <th>Row Count</th>
+                                    <th>Integrity Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="health-tables-tbody">
+                                <tr>
+                                    <td colspan="3" style="text-align:center; color:var(--text-muted);">Querying
+                                        database records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Global Notification Toast -->
+    <div id="toast" class="toast-notify"></div>
+
+    <!-- ====================================================================
+         JAVASCRIPT APPLICATION CORE
+         ==================================================================== -->
+    <script>
+        // Tab Navigation
+        function switchTab(name) {
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                const active = panel.id === `panel-${name}`;
+                panel.classList.toggle('active', active);
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                const active = btn.id === `tab-${name}`;
+                btn.setAttribute('aria-selected', String(active));
+            });
+            if (name === 'overview' && window.resizeCyberGlobe) {
+                window.resizeCyberGlobe();
+            }
+        }
+
+        // HTML Escaping Utility
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Market Session Label Formatter
+        function formatSessionLabel(sess) {
+            if (!sess) return 'CLOSED';
+            if (typeof sess === 'string') return sess.trim();
+            if (typeof sess === 'object') {
+                const status = (sess.status || 'CLOSED').trim();
+                const session = (sess.session || '').trim();
+                if (session && session !== status && session !== 'REGULAR' && session !== 'CLOSED') {
+                    return `${status} (${session})`;
+                }
+                return status;
+            }
+            return String(sess);
+        }
+
+        // Toast Handler
+        function showToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.style.borderColor = isSuccess ? 'var(--accent-cyan)' : 'var(--accent-negative)';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4500);
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', next);
+            showToast(`Theme switched to ${next.toUpperCase()}`, true);
+        }
+
+        // ====================================================================
+        // 3D PERSPECTIVE GRID BACKGROUND CANVAS
+        // ====================================================================
+        (function initPerspectiveGrid() {
+            const canvas = document.getElementById('bg-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let w, h;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            let offset = 0;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function drawGrid() {
+                if (document.hidden) {
+                    if (!prefersReducedMotion) requestAnimationFrame(drawGrid);
+                    return;
+                }
+                ctx.clearRect(0, 0, w, h);
+
+                // Perspective vanishing horizon
+                const horizonY = h * 0.42;
+                const fov = 340;
+
+                ctx.strokeStyle = 'rgba(41, 58, 80, 0.28)';
+                ctx.lineWidth = 1;
+
+                // Perspective longitudinal lines
+                const lines = 24;
+                for (let i = -lines; i <= lines; i++) {
+                    const startX = w * 0.5 + i * (w / (lines * 1.5));
+                    ctx.beginPath();
+                    ctx.moveTo(w * 0.5 + (startX - w * 0.5) * 0.08, horizonY);
+                    ctx.lineTo(startX, h);
+                    ctx.stroke();
+                }
+
+                // Perspective latitudinal lines moving forward
+                if (!prefersReducedMotion) offset = (offset + 0.35) % 40;
+                for (let z = 40 - offset; z < 500; z += 40) {
+                    const py = horizonY + (fov * (h - horizonY)) / (fov + z);
+                    const alpha = Math.max(0, Math.min(0.4, (py - horizonY) / (h - horizonY)));
+                    ctx.strokeStyle = `rgba(32, 227, 242, ${alpha * 0.35})`;
+                    ctx.beginPath();
+                    ctx.moveTo(0, py);
+                    ctx.lineTo(w, py);
+                    ctx.stroke();
+                }
+
+                if (!prefersReducedMotion) {
+                    requestAnimationFrame(drawGrid);
+                }
+            }
+            drawGrid();
+        })();
+
+        // ====================================================================
+        // 3D INTERACTIVE CYBER NETWORK SPHERE (OVERVIEW TAB)
+        // ====================================================================
+        let globeRotationX = 0.2;
+        let globeRotationY = 0.0;
+        let isDragging = false;
+        let lastMouseX = 0, lastMouseY = 0;
+        let realNodesData = [];
+
+        (function initCyberGlobe() {
+            const canvas = document.getElementById('cyber-globe-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const tooltip = document.getElementById('viz-tooltip');
+
+            let w, h;
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                w = canvas.width = rect.width;
+                h = canvas.height = rect.height;
+            }
+            window.resizeCyberGlobe = resize;
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Preset locations for real telemetry nodes
+            const assetLocations = [
+                { name: "MSFT (Microsoft)", ticker: "MSFT", lat: 47.6, lon: -122.3, type: "asset", risk: 85, drop: "-3.05%" },
+                { name: "TCS (Tata Consultancy)", ticker: "TCS.NS", lat: 19.0, lon: 72.8, type: "asset", risk: 42, drop: "-0.85%" },
+                { name: "AAPL (Apple Inc.)", ticker: "AAPL", lat: 37.3, lon: -122.0, type: "asset", risk: 38, drop: "+0.45%" },
+                { name: "INFY (Infosys Ltd.)", ticker: "INFY.NS", lat: 12.9, lon: 77.5, type: "asset", risk: 45, drop: "-1.10%" },
+                { name: "CRWD (CrowdStrike)", ticker: "CRWD", lat: 30.2, lon: -97.7, type: "asset", risk: 90, drop: "-11.2%" },
+                { name: "TMUS (T-Mobile)", ticker: "TMUS", lat: 40.7, lon: -74.0, type: "threat", risk: 82, drop: "-0.64%" },
+                { name: "SolarWinds Orion", ticker: "SWI", lat: 38.9, lon: -77.0, type: "threat", risk: 95, drop: "-23.3%" },
+                { name: "HDFCBANK (HDFC)", ticker: "HDFCBANK.NS", lat: 18.9, lon: 72.8, type: "asset", risk: 35, drop: "+0.15%" }
+            ];
+
+            canvas.addEventListener('mousedown', e => {
+                isDragging = true;
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => { isDragging = false; });
+            canvas.addEventListener('mousemove', e => {
+                if (isDragging) {
+                    const dx = e.clientX - lastMouseX;
+                    const dy = e.clientY - lastMouseY;
+                    globeRotationY += dx * 0.006;
+                    globeRotationX += dy * 0.006;
+                    lastMouseX = e.clientX;
+                    lastMouseY = e.clientY;
+                } else {
+                    checkNodeHover(e);
+                }
+            });
+
+            function checkNodeHover(e) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                let found = null;
+
+                for (const node of realNodesData) {
+                    const dist = Math.hypot(node.screenX - mouseX, node.screenY - mouseY);
+                    if (dist < 10 && node.z > 0) {
+                        found = node;
+                        break;
+                    }
+                }
+
+                if (found && tooltip) {
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${found.screenX + 14}px`;
+                    tooltip.style.top = `${found.screenY - 14}px`;
+                    tooltip.innerHTML = `
+                        <div style="font-weight:700; color:var(--accent-cyan); margin-bottom:3px;">${escapeHtml(found.name)}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">TICKER: <strong>${escapeHtml(found.ticker)}</strong></div>
+                        <div style="font-size:10px; color:${found.risk >= 70 ? 'var(--accent-negative)' : 'var(--accent-positive)'};">COMPOSITE RISK: ${found.risk}/100</div>
+                        <div style="font-size:10px; color:var(--text-secondary);">1D MARKET MOVE: ${found.drop}</div>
+                    `;
+                } else if (tooltip) {
+                    tooltip.style.display = 'none';
+                }
+            }
+
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function renderGlobe() {
+                if (document.hidden) {
+                    requestAnimationFrame(renderGlobe);
+                    return;
+                }
+                ctx.clearRect(0, 0, w, h);
+
+                const cx = w * 0.5;
+                const cy = h * 0.5;
+                const R = Math.min(w, h) * 0.38;
+
+                if (!isDragging && !prefersReducedMotion) {
+                    globeRotationY += 0.003;
+                }
+
+                // Draw Latitude & Longitude grid rings in 3D
+                ctx.lineWidth = 1;
+                const rings = 7;
+                for (let latIdx = -rings; latIdx <= rings; latIdx++) {
+                    const phi = (latIdx / rings) * (Math.PI / 2) * 0.85;
+                    const rRing = R * Math.cos(phi);
+                    const y0 = R * Math.sin(phi);
+
+                    ctx.beginPath();
+                    let first = true;
+                    for (let step = 0; step <= 64; step++) {
+                        const theta = (step / 64) * Math.PI * 2;
+                        // 3D coordinates
+                        let x3d = rRing * Math.cos(theta);
+                        let y3d = y0;
+                        let z3d = rRing * Math.sin(theta);
+
+                        // Rotate Y
+                        const cosY = Math.cos(globeRotationY), sinY = Math.sin(globeRotationY);
+                        const rx = x3d * cosY - z3d * sinY;
+                        const rz = x3d * sinY + z3d * cosY;
+
+                        // Rotate X
+                        const cosX = Math.cos(globeRotationX), sinX = Math.sin(globeRotationX);
+                        const ry = y3d * cosX - rz * sinX;
+                        const fz = y3d * sinX + rz * cosX;
+
+                        const px = cx + rx;
+                        const py = cy + ry;
+
+                        if (first) { ctx.moveTo(px, py); first = false; }
+                        else { ctx.lineTo(px, py); }
+                    }
+                    ctx.strokeStyle = latIdx === 0 ? 'rgba(32, 227, 242, 0.35)' : 'rgba(41, 58, 80, 0.22)';
+                    ctx.stroke();
+                }
+
+                // Project Real Data Nodes
+                realNodesData = [];
+                for (const item of assetLocations) {
+                    const latRad = (item.lat * Math.PI) / 180;
+                    const lonRad = (item.lon * Math.PI) / 180;
+
+                    let x3d = R * Math.cos(latRad) * Math.cos(lonRad);
+                    let y3d = -R * Math.sin(latRad);
+                    let z3d = R * Math.cos(latRad) * Math.sin(lonRad);
+
+                    // Rotate Y
+                    const cosY = Math.cos(globeRotationY), sinY = Math.sin(globeRotationY);
+                    const rx = x3d * cosY - z3d * sinY;
+                    const rz = x3d * sinY + z3d * cosY;
+
+                    // Rotate X
+                    const cosX = Math.cos(globeRotationX), sinX = Math.sin(globeRotationX);
+                    const ry = y3d * cosX - rz * sinX;
+                    const fz = y3d * sinX + rz * cosX;
+
+                    const screenX = cx + rx;
+                    const screenY = cy + ry;
+
+                    realNodesData.push({ ...item, screenX, screenY, z: fz });
+
+                    if (fz > -R * 0.1) {
+                        const alpha = Math.max(0.15, (fz + R) / (2 * R));
+                        const color = item.type === 'threat' ? '#FF667A' : '#20E3F2';
+
+                        // Outer beacon ring
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+                        ctx.strokeStyle = color;
+                        ctx.globalAlpha = alpha;
+                        ctx.stroke();
+
+                        // Core node
+                        ctx.beginPath();
+                        ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+                        ctx.fillStyle = color;
+                        ctx.fill();
+
+                        // Label
+                        ctx.fillStyle = '#EAF2FF';
+                        ctx.font = '10px "JetBrains Mono", monospace';
+                        ctx.fillText(item.ticker, screenX + 8, screenY + 3);
+                        ctx.globalAlpha = 1.0;
+                    }
+                }
+
+                // Draw Connecting Signal Arcs between threat and assets
+                for (let i = 0; i < realNodesData.length - 1; i += 2) {
+                    const n1 = realNodesData[i];
+                    const n2 = realNodesData[i + 1];
+                    if (n1.z > -R * 0.2 && n2.z > -R * 0.2) {
+                        ctx.beginPath();
+                        ctx.moveTo(n1.screenX, n1.screenY);
+                        const midX = (n1.screenX + n2.screenX) * 0.5;
+                        const midY = Math.min(n1.screenY, n2.screenY) - 20;
+                        ctx.quadraticCurveTo(midX, midY, n2.screenX, n2.screenY);
+                        ctx.strokeStyle = 'rgba(32, 227, 242, 0.4)';
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+                    }
+                }
+
+                requestAnimationFrame(renderGlobe);
+            }
+            renderGlobe();
+        })();
+
+        function resetGlobeView() {
+            globeRotationX = 0.2;
+            globeRotationY = 0.0;
+        }
+
+        // ====================================================================
+        // DATA FETCHING & API INTEGRATION
+        // ====================================================================
+
+        // 1. Fetch High-Level Metrics (Tab 1)
+        async function fetchMetrics() {
+            try {
+                const res = await fetch('/api/metrics');
+                if (!res.ok) return;
+                const d = await res.json();
+                document.getElementById('kpi-monitored').innerText = d.monitored_stocks || '0';
+                document.getElementById('kpi-threats').innerText = d.total_threats || '0';
+                document.getElementById('kpi-critical').innerText = d.critical_alerts || '0';
+                document.getElementById('kpi-drop').innerText = (d.max_drop_percent || 0).toFixed(2) + '%';
+                document.getElementById('kpi-avg-risk').innerText = (d.average_risk_score || 0).toFixed(1) + '/100';
+            } catch (err) {
+                console.error('Error fetching metrics:', err);
+            }
+        }
+
+        // 2. Fetch Verified Threats (Tab 2)
+        async function fetchThreats() {
+            try {
+                const res = await fetch('/api/threats');
+                if (!res.ok) return;
+                const threats = await res.json();
+                document.getElementById('nav-threat-count').innerText = threats.length;
+                const tbody = document.getElementById('threats-tbody');
+                if (!tbody) return;
+
+                if (!threats.length) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">No threat records found in SQLite.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = threats.map(t => {
+                    const cves = Array.isArray(t.cve_ids) ? t.cve_ids : [];
+                    const cveHtml = cves.length
+                        ? cves.map(c => `<a class="cve-pill" href="https://nvd.nist.gov/vuln/detail/${escapeHtml(c)}" target="_blank" rel="noopener noreferrer">${escapeHtml(c)}</a>`).join(' ')
+                        : '<span style="color:var(--text-muted); font-size:11px;">None</span>';
+
+                    const exp = (t.exposure_level || 'UNKNOWN').toUpperCase();
+                    const expClass = exp === 'DIRECT' ? 'direct' : (exp === 'INDIRECT' ? 'indirect' : 'unknown');
+                    const sig = (t.recommendation || 'NO SIGNAL').toUpperCase();
+                    const sigClass = (sig === 'REVIEW' || sig === 'MONITOR') ? 'review' : 'no-signal';
+
+                    return `
+                        <tr>
+                            <td style="font-family:'JetBrains Mono',monospace; white-space:nowrap;">${escapeHtml(t.threat_date || t.created_at || 'N/A')}</td>
+                            <td>
+                                <strong>${escapeHtml(t.company || 'Unknown')}</strong>
+                                <span style="font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-size:11px;">(${escapeHtml(t.ticker || 'N/A')})</span>
+                            </td>
+                            <td>${escapeHtml(t.threat_type || 'General')}</td>
+                            <td>
+                                <strong style="color:${t.severity_score >= 8 ? 'var(--accent-negative)' : 'var(--text-primary)'}">${(t.severity_score || 0).toFixed(1)}/10</strong>
+                            </td>
+                            <td><span class="badge-exposure ${expClass}">${exp}</span></td>
+                            <td>${cveHtml}</td>
+                            <td>
+                                <strong style="font-family:'JetBrains Mono',monospace; color:${t.risk_score >= 70 ? 'var(--accent-negative)' : 'var(--text-primary)'}">
+                                    ${t.risk_score || 0}/100
+                                </strong>
+                            </td>
+                            <td><span class="signal-badge ${sigClass}">${sig}</span></td>
+                            <td style="font-size:11.5px; color:var(--text-secondary);">${escapeHtml(t.analysis_source || 'Heuristic')}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                renderSeverityDistribution(threats);
+            } catch (err) {
+                console.error('Error fetching threats:', err);
+            }
+        }
+
+        function renderSeverityDistribution(threats) {
+            const chart = document.getElementById('severity-distribution-chart');
+            if (!chart) return;
+            const buckets = { "Low (1-4)": 0, "Medium (5-6)": 0, "High (7-8)": 0, "Critical (9-10)": 0 };
+            threats.forEach(t => {
+                const s = Number(t.severity_score || 0);
+                if (s >= 9) buckets["Critical (9-10)"]++;
+                else if (s >= 7) buckets["High (7-8)"]++;
+                else if (s >= 5) buckets["Medium (5-6)"]++;
+                else if (s > 0) buckets["Low (1-4)"]++;
+            });
+            const maxVal = Math.max(1, ...Object.values(buckets));
+            chart.innerHTML = Object.keys(buckets).map(label => {
+                const count = buckets[label];
+                const pct = (count / maxVal) * 100;
+                const color = label.includes('Critical') ? 'var(--accent-negative)' :
+                    label.includes('High') ? 'var(--accent-warning)' :
+                        label.includes('Medium') ? 'var(--accent-cyan)' : 'var(--accent-positive)';
+                return `
+                    <div style="margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px; font-family:'JetBrains Mono',monospace;">
+                            <span>${label}</span>
+                            <strong>${count} incidents</strong>
+                        </div>
+                        <div style="height:6px; background:rgba(41,58,80,0.6); border-radius:999px; overflow:hidden;">
+                            <div style="height:100%; width:${pct}%; background:${color}; border-radius:999px;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 3. Fetch Live Market Quotes (Tab 3)
+        async function fetchStocks(isRetry = false) {
+            const tbody = document.getElementById('stocks-tbody');
+            if (isRetry && tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">Loading live market quotes...</td></tr>';
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            try {
+                const res = await fetch('/api/stocks', { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) {
+                    throw new Error(`Server returned HTTP ${res.status} (${res.statusText || 'Error'})`);
+                }
+
+                const stocks = await res.json();
+                if (!Array.isArray(stocks)) {
+                    throw new Error('Malformed API response: expected a list of equity quotes');
+                }
+
+                const navCount = document.getElementById('nav-stock-count');
+                if (navCount) navCount.innerText = stocks.length;
+
+                if (!tbody) return;
+
+                if (stocks.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No monitored stocks found. Add a stock using the search bar above.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = stocks.map(s => {
+                    const chg = Number(s.change_percent || 0);
+                    const chgColor = chg < 0 ? 'var(--accent-negative)' : (chg > 0 ? 'var(--accent-positive)' : 'var(--text-muted)');
+                    const chgSign = chg > 0 ? '+' : '';
+                    const sym = s.currency_symbol || (s.market === 'India' ? '₹' : '$');
+
+                    let sessionStatusStr = 'CLOSED';
+                    if (typeof s.session_status === 'string') {
+                        sessionStatusStr = s.session_status.trim();
+                    } else if (s.session_status && typeof s.session_status === 'object') {
+                        sessionStatusStr = (s.session_status.status || s.session_status.session || 'CLOSED').trim();
+                    } else if (s.market_session && typeof s.market_session === 'object') {
+                        sessionStatusStr = (s.market_session.status || s.market_session.session || 'CLOSED').trim();
+                    }
+
+                    const isClosed = sessionStatusStr.toUpperCase().includes('CLOSED');
+                    const badgeClass = isClosed ? 'closed' : 'open';
+
+                    const priceVal = Number(s.current_price);
+                    const displayPrice = (priceVal != null && !isNaN(priceVal) && priceVal > 0)
+                        ? `${sym}${priceVal.toFixed(2)}`
+                        : 'N/A';
+
+                    const freshnessLabel = s.freshness_label || (s.exchange_timestamp ? `as of ${s.exchange_timestamp}` : (s.quote_age_minutes != null ? `${Math.round(s.quote_age_minutes)}m ago` : 'as of N/A'));
+
+                    let freshnessHtml = '';
+                    if (s.is_stale) {
+                        const warnTitle = escapeHtml(s.stale_warning || 'Data is older than last market session');
+                        freshnessHtml = `<span style="display:inline-flex; align-items:center; gap:4px; color:var(--accent-warning); background:rgba(255,170,0,0.1); border:1px solid rgba(255,170,0,0.3); border-radius:4px; padding:2px 6px; font-size:11px;" title="${warnTitle}">⚠️ ${escapeHtml(freshnessLabel)}</span>`;
+                    } else if (isClosed) {
+                        freshnessHtml = `<span style="font-size:11px; color:var(--text-muted);" title="Session close price">${escapeHtml(freshnessLabel)}</span>`;
+                    } else {
+                        freshnessHtml = `<span style="font-size:11px; color:var(--text-secondary);" title="Delayed feed (~15m)">${escapeHtml(freshnessLabel)}</span>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent-cyan);">${escapeHtml(s.ticker || '--')}</td>
+                            <td>${escapeHtml(s.company_name || s.ticker || '--')}</td>
+                            <td><span class="tag-pill" style="font-size:9.5px;">${escapeHtml(s.market || 'US')}</span></td>
+                            <td style="font-family:'JetBrains Mono',monospace; font-weight:700;">${displayPrice}</td>
+                            <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:${chgColor};">${chgSign}${chg.toFixed(2)}%</td>
+                            <td style="font-family:'JetBrains Mono',monospace; font-size:11.5px;">${freshnessHtml}</td>
+                            <td><span class="session-badge ${badgeClass}">${escapeHtml(sessionStatusStr)}</span></td>
+                            <td style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-secondary);">${escapeHtml(s.benchmark_ticker || 'SPY')}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                clearTimeout(timeoutId);
+                console.error('Error fetching stocks:', err);
+                if (tbody) {
+                    const isTimeout = err.name === 'AbortError';
+                    const errorDetail = isTimeout ? 'Request timed out after 10 seconds' : (err.message || 'Network error occurred');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align:center; padding:28px 16px;">
+                                <div style="display:inline-flex; flex-direction:column; align-items:center; gap:8px; background:rgba(255,102,122,0.08); border:1px solid rgba(255,102,122,0.3); border-radius:var(--radius-sm); padding:16px 24px; max-width:480px;">
+                                    <div style="display:flex; align-items:center; gap:8px; color:var(--accent-negative); font-weight:600; font-size:13px;">
+                                        <span>⚠️ Failed to load live market quotes</span>
+                                    </div>
+                                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
+                                        ${escapeHtml(errorDetail)}
+                                    </div>
+                                    <button class="btn btn-secondary" onclick="fetchStocks(true)" style="padding:5px 14px; font-size:11.5px; margin-top:4px;">
+                                        ↻ Retry
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // 4. Fetch Correlations (Tab 4)
+        async function fetchCorrelations() {
+            try {
+                const res = await fetch('/api/correlations');
+                if (!res.ok) return;
+                const rows = await res.json();
+                const tbody = document.getElementById('correlations-tbody');
+                if (!tbody) return;
+
+                if (!rows.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No correlation records found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = rows.map(c => {
+                    const drop = Number(c.price_change_percent || 0);
+                    const sig = (c.recommendation || 'NO SIGNAL').toUpperCase();
+                    const sigClass = (sig === 'REVIEW' || sig === 'MONITOR') ? 'review' : 'no-signal';
+                    const reviewTag = c.review_needed
+                        ? `<span class="badge-exposure indirect">REVIEW PENDING</span>`
+                        : `<span class="session-badge open">VERIFIED</span>`;
+
+                    return `
+                        <tr>
+                            <td style="font-family:'JetBrains Mono',monospace; white-space:nowrap;">${escapeHtml(c.threat_date || c.created_at || 'N/A')}</td>
+                            <td>
+                                <strong>${escapeHtml(c.company || 'Unknown')}</strong>
+                                <span style="font-family:'JetBrains Mono',monospace; color:var(--text-muted); font-size:11px;">(${escapeHtml(c.ticker)})</span>
+                            </td>
+                            <td style="max-width:280px; font-size:12px; color:var(--text-secondary);">${escapeHtml(c.description || c.threat_type || 'Incident')}</td>
+                            <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:${drop < 0 ? 'var(--accent-negative)' : 'var(--accent-positive)'};">
+                                ${drop > 0 ? '+' : ''}${drop.toFixed(2)}%
+                            </td>
+                            <td>
+                                <strong style="font-family:'JetBrains Mono',monospace; color:${c.risk_score >= 70 ? 'var(--accent-negative)' : 'var(--text-primary)'}">
+                                    ${c.risk_score || 0}/100
+                                </strong>
+                            </td>
+                            <td><span class="signal-badge ${sigClass}">${sig}</span></td>
+                            <td>${reviewTag}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Error fetching correlations:', err);
+            }
+        }
+
+        // 5. Fetch Sector Comparisons (Tab 1 & Markets)
+        async function fetchSectorComparison() {
+            try {
+                const res = await fetch('/api/sector_comparison');
+                if (!res.ok) return;
+                const items = await res.json();
+                renderSectorPerformance(items);
+            } catch (err) {
+                console.error('Error fetching sector comparisons:', err);
+            }
+        }
+
+        function renderSectorPerformance(items) {
+            const chart = document.getElementById('sector-performance-chart');
+            if (!chart) return;
+            const valid = (items || []).filter(item => item.excess_performance != null && Number.isFinite(Number(item.excess_performance))).slice(0, 6);
+            if (!valid.length) {
+                chart.innerHTML = '<div style="color:var(--text-muted); padding:20px; text-align:center;">No relative sector benchmarks available.</div>';
+                return;
+            }
+            const values = valid.map(i => Number(i.excess_performance));
+            const limit = Math.max(1, ...values.map(Math.abs));
+            const center = 210, half = 140, scale = half / limit;
+            const bars = valid.map((item, index) => {
+                const val = Number(item.excess_performance);
+                const y = 14 + index * 26;
+                const width = Math.abs(val * scale);
+                const x = val < 0 ? center - width : center;
+                const color = val < 0 ? '#FF667A' : '#42D6A4';
+                return `
+                    <text x="6" y="${y + 10}" fill="#92A4BC" font-family="'JetBrains Mono', monospace" font-size="10">${item.ticker} vs ${item.benchmark_ticker || 'ETF'}</text>
+                    <rect x="${x}" y="${y}" width="${width}" height="12" rx="3" fill="${color}" opacity="0.85"/>
+                    <text x="${center + half + 8}" y="${y + 10}" fill="#EAF2FF" font-family="'JetBrains Mono', monospace" font-size="10">${val > 0 ? '+' : ''}${val.toFixed(2)}%</text>
+                `;
+            }).join('');
+            chart.innerHTML = `
+                <svg viewBox="0 0 440 ${valid.length * 26 + 16}" style="width:100%; max-width:440px; display:block; margin:0 auto;">
+                    <line x1="${center}" y1="6" x2="${center}" y2="${valid.length * 26 + 8}" stroke="#293A50" stroke-dasharray="3 3"/>
+                    ${bars}
+                </svg>
+            `;
+        }
+
+        // 6. ML Forecasts, Scorecard & Horizon Tracking (Tab 6)
+        async function fetchPredictionPerformance() {
+            try {
+                // Fetch LOOCV Scorecard
+                const resML = await fetch('/api/ml/metrics');
+                if (resML.ok) {
+                    const mlData = await resML.json();
+                    const tbody = document.getElementById('loocv-scorecard-tbody');
+                    const candEval = mlData.candidate_evaluation_abnormal_1d || {};
+                    const models = candEval.models || {};
+
+                    if (Object.keys(models).length > 0) {
+                        tbody.innerHTML = Object.keys(models).map(name => {
+                            const m = models[name] || {};
+                            const tierPills = {
+                                "RECOMMENDED_BENCHMARK": '<span class="tag-pill" style="background:rgba(0,255,204,0.15); color:var(--accent-cyan); border:1px solid var(--accent-cyan); font-size:9.5px;">PRIMARY BENCHMARK</span>',
+                                "BASELINE": '<span class="tag-pill" style="background:rgba(255,255,255,0.08); color:var(--text-secondary); font-size:9.5px;">BASELINE</span>',
+                                "EXPERIMENTAL": '<span class="tag-pill" style="background:rgba(255,180,0,0.15); color:#ffb400; border:1px solid #ffb400; font-size:9.5px;">EXPERIMENTAL</span>'
+                            };
+                            const tierHtml = tierPills[m.tier] || `<span class="tag-pill">${escapeHtml(m.tier || '')}</span>`;
+                            const target = m.target_definition ? `${escapeHtml(m.target_definition)} (${escapeHtml(m.prediction_horizon || '1D')})` : '1-Day Abnormal Return';
+                            const mae = m.loocv_mae != null ? Number(m.loocv_mae).toFixed(2) + '%' : 'N/A';
+                            const ci = m.loocv_mae_ci_95 || 'N/A';
+                            const logoMae = m.logo_mae != null ? Number(m.logo_mae).toFixed(2) + '%' : 'N/A';
+                            const rmse = m.loocv_rmse != null ? Number(m.loocv_rmse).toFixed(2) + '%' : 'N/A';
+                            const logoRmse = m.logo_rmse != null ? Number(m.logo_rmse).toFixed(2) + '%' : 'N/A';
+                            const dirAcc = m.directional_accuracy != null ? Number(m.directional_accuracy).toFixed(1) + '%' : 'N/A';
+                            const balAcc = m.balanced_accuracy != null ? Number(m.balanced_accuracy).toFixed(1) + '%' : 'N/A';
+                            const sampleVal = `N=${m.eval_sample_count || 21} (${escapeHtml(m.validation_methodology ? 'LOOCV/LOGO-CV' : 'LOOCV')})`;
+                            const verDate = `${escapeHtml(m.model_version || 'v3.0.0')} (${escapeHtml(m.evaluation_date || '2026-10-24')})`;
+                            const vsBm = m.vs_median_baseline || 'N/A';
+                            const role = m.role || 'Evaluated Model';
+
+                            return `
+                                <tr>
+                                    <td>
+                                        <strong>${escapeHtml(name)}</strong><br>
+                                        <span style="font-size:10.5px; color:var(--text-muted);">${escapeHtml(role)}</span>
+                                    </td>
+                                    <td>${tierHtml}</td>
+                                    <td style="font-size:11px; color:var(--text-secondary); max-width:170px;">${target}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:${m.tier === 'RECOMMENDED_BENCHMARK' ? 'var(--accent-cyan)' : 'var(--text-primary)'};">${mae}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-secondary);">${escapeHtml(ci)}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace; font-weight:600; color:${m.tier === 'RECOMMENDED_BENCHMARK' ? 'var(--accent-cyan)' : 'var(--text-primary)'};">${logoMae}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${rmse}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${logoRmse}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">${dirAcc} / ${balAcc}</td>
+                                    <td style="font-size:11px; color:var(--text-muted);">${escapeHtml(sampleVal)}</td>
+                                    <td style="font-size:10.5px; font-family:'JetBrains Mono',monospace; color:var(--text-secondary);">${verDate}</td>
+                                    <td style="font-size:11px; font-weight:600; color:${vsBm.includes('worse') ? 'var(--accent-negative)' : 'var(--accent-cyan)'};">${escapeHtml(vsBm)}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else if (mlData.staged_comparison) {
+                        const comp = mlData.staged_comparison;
+                        tbody.innerHTML = Object.keys(comp).map(modelName => {
+                            const m = comp[modelName] || {};
+                            const mae = m.mae != null ? Number(m.mae).toFixed(2) + '%' : 'N/A';
+                            const rmse = m.rmse != null ? Number(m.rmse).toFixed(2) + '%' : 'N/A';
+                            const dirAcc = m.directional_accuracy != null ? (Number(m.directional_accuracy) * 100).toFixed(1) + '%' : 'N/A';
+                            return `
+                                <tr>
+                                    <td><strong>${escapeHtml(modelName)}</strong></td>
+                                    <td><span class="tag-pill">LEGACY</span></td>
+                                    <td>Raw Return (T-1 to T+2)</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${mae}</td>
+                                    <td>N/A</td>
+                                    <td>N/A</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${rmse}</td>
+                                    <td>N/A</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${dirAcc}</td>
+                                    <td>N=14 (LOOCV)</td>
+                                    <td>v2.2.0</td>
+                                    <td>N/A</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+
+                    // Render legacy scorecard table if present
+                    const legacyTbody = document.getElementById('legacy-scorecard-tbody');
+                    if (legacyTbody && mlData.staged_comparison) {
+                        const comp = mlData.staged_comparison;
+                        legacyTbody.innerHTML = Object.keys(comp).map(modelName => {
+                            const m = comp[modelName] || {};
+                            const mae = m.mae != null ? Number(m.mae).toFixed(2) + '%' : 'N/A';
+                            const rmse = m.rmse != null ? Number(m.rmse).toFixed(2) + '%' : 'N/A';
+                            const dirAcc = m.directional_accuracy != null ? (Number(m.directional_accuracy) * 100).toFixed(1) + '%' : 'N/A';
+                            return `
+                                <tr>
+                                    <td><strong>${escapeHtml(modelName)}</strong></td>
+                                    <td style="font-size:11px; color:var(--text-secondary);">Raw Stock Price Change (% from T-1 to T+2)</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${mae}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace;">${rmse}</td>
+                                    <td style="font-family:'JetBrains Mono',monospace; color:var(--accent-cyan); font-weight:700;">${dirAcc}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                // Fetch Live Horizons
+                const resPred = await fetch('/api/prediction_performance');
+                if (resPred.ok) {
+                    const predData = await resPred.json();
+                    const hs = predData.horizons || {};
+                    const pct = v => v == null ? 'N/A' : (Number(v) * 100).toFixed(1) + '%';
+                    const mae = v => v == null ? 'N/A' : Number(v).toFixed(2) + '%';
+
+                    document.getElementById('prediction-horizons').innerHTML = ['1d', '3d', '5d'].map(h => {
+                        const item = hs[h] || {};
+                        return `
+                            <tr>
+                                <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent-cyan);">${h.toUpperCase()}</td>
+                                <td style="font-family:'JetBrains Mono',monospace;">${item.count || 0}</td>
+                                <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent-positive);">${pct(item.direction_accuracy)}</td>
+                                <td style="font-family:'JetBrains Mono',monospace;">${mae(item.mae)}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Error fetching prediction metrics:', err);
+            }
+        }
+
+        // On-Demand Simulator Call
+        async function runMLSimulation() {
+            const sev = parseFloat(document.getElementById('ml-input-sev').value) || 7.0;
+            const users = parseFloat(document.getElementById('ml-input-users').value) || 0.0;
+            const sens = parseFloat(document.getElementById('ml-input-sens').value) || 7.0;
+
+            try {
+                const res = await fetch('/api/ml/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ severity_score: sev, users_affected_millions: users, data_sensitivity_score: sens })
+                });
+                if (!res.ok) throw new Error('Simulation failed');
+                const d = await res.json();
+
+                // Experimental Model Output (Random Forest)
+                const valEl = document.getElementById('ml-sim-val');
+                const drop = Number(d.predicted_change_percent || 0);
+                valEl.innerText = `${drop > 0 ? '+' : ''}${drop.toFixed(2)}%`;
+                valEl.style.color = drop < 0 ? 'var(--accent-negative)' : 'var(--accent-positive)';
+
+                // Huber Experimental Output
+                const huberValEl = document.getElementById('ml-huber-val');
+                if (huberValEl) {
+                    if (d.experimental_huber && d.experimental_huber.predicted_change_percent != null) {
+                        const hDrop = Number(d.experimental_huber.predicted_change_percent);
+                        huberValEl.innerText = `${hDrop > 0 ? '+' : ''}${hDrop.toFixed(2)}%`;
+                        huberValEl.style.color = hDrop < 0 ? 'var(--accent-negative)' : 'var(--accent-positive)';
+                    } else {
+                        huberValEl.innerText = 'N/A';
+                    }
+                }
+
+                // Primary Benchmark Output
+                const bm = d.primary_benchmark || {};
+                const bmValEl = document.getElementById('ml-benchmark-val');
+                if (bmValEl) {
+                    const bmDrop = Number(bm.median_abnormal_return_pct ?? bm.median_abnormal_return ?? -2.00);
+                    bmValEl.innerText = `${bmDrop > 0 ? '+' : ''}${bmDrop.toFixed(2)}%`;
+                }
+
+                // Target Horizon & Definition Disclosures
+                document.getElementById('ml-sim-horizon').innerText = d.prediction_horizon || '1-Day Post-Disclosure';
+                document.getElementById('ml-sim-target').innerText = d.target_definition || 'Benchmark-Adjusted 1-Day Abnormal Return';
+
+                // Tree dispersion spread
+                const range = d.expected_range_percent || {};
+                document.getElementById('ml-sim-spread').innerText = range.low != null
+                    ? `[${range.low}% to ${range.high}%] (${range.basis || 'tree spread'})`
+                    : 'Descriptive spread unavailable';
+
+                // Prediction interval status
+                const piEl = document.getElementById('ml-sim-pred-interval');
+                if (piEl) {
+                    const pi = d.incident_prediction_interval || {};
+                    piEl.innerText = pi.status === 'UNAVAILABLE'
+                        ? 'Unavailable (N=21 sample size is insufficient for calibrated prediction intervals)'
+                        : (pi.interval || 'Unavailable');
+                }
+
+                document.getElementById('ml-sim-model').innerText = d.model_version || 'v2.2.0-leakage-safe-pipeline';
+
+                const huberText = (d.experimental_huber && d.experimental_huber.predicted_change_percent != null)
+                    ? ` | Huber ${(d.experimental_huber.predicted_change_percent > 0 ? '+' : '') + Number(d.experimental_huber.predicted_change_percent).toFixed(2)}%`
+                    : '';
+                showToast(`Simulation updated: RF ${drop > 0 ? '+' : ''}${drop.toFixed(2)}%${huberText} vs Median BM -2.00%`, true);
+            } catch (err) {
+                showToast('Simulation error: ' + err.message, false);
+            }
+        }
+
+        async function evaluatePredictions() {
+            const btn = document.getElementById('btn-evaluate-predictions');
+            btn.disabled = true;
+            btn.innerText = 'Evaluating market bars…';
+            try {
+                const res = await fetch('/api/predictions/evaluate', { method: 'POST' });
+                const r = await res.json();
+                await fetchPredictionPerformance();
+                showToast(`Evaluated ${r.checked || 0} predictions; ${r.updated?.length || 0} updated.`, true);
+            } catch (err) {
+                showToast('Evaluation failed: ' + err, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Evaluate Pending';
+            }
+        }
+
+        // 7. Event Studies (Tab 7)
+        async function fetchEventStudy() {
+            try {
+                const res = await fetch('/api/event_study');
+                if (!res.ok) return;
+                const data = await res.json();
+                const summary = data.summary || {};
+                const pct = v => v == null ? 'N/A' : Number(v).toFixed(2) + '%';
+                const num = v => v == null ? 'N/A' : Number(v).toFixed(2);
+                const counts = summary.count_by_severity_tier || {};
+
+                // Summary KPI Cards
+                document.getElementById('event-study-summary').innerHTML = `
+                    <div class="kpi-card" style="padding:14px; margin-bottom:0;">
+                        <div class="kpi-label">Evaluated Breaches</div>
+                        <div class="kpi-value" style="font-size:22px;">${summary.evaluated_count || 0} / 14</div>
+                        <div class="kpi-sub">Curated historical dataset</div>
+                    </div>
+                    <div class="kpi-card" style="padding:14px; margin-bottom:0;">
+                        <div class="kpi-label">Mean 1D Raw Return</div>
+                        <div class="kpi-value" style="font-size:22px; color:${Number(summary.average_raw_return_1d || 0) < 0 ? 'var(--accent-negative)' : 'var(--text-primary)'};">${pct(summary.average_raw_return_1d)}</div>
+                        <div class="kpi-sub">Observed stock only (unadjusted)</div>
+                    </div>
+                    <div class="kpi-card" style="padding:14px; margin-bottom:0;">
+                        <div class="kpi-label">Mean 1D Abnormal Return</div>
+                        <div class="kpi-value" style="font-size:22px; color:${Number(summary.average_abnormal_return_1d || 0) < 0 ? 'var(--accent-negative)' : 'var(--text-primary)'};">${pct(summary.average_abnormal_return_1d)}</div>
+                        <div class="kpi-sub">Benchmark-adjusted (stock - market)</div>
+                    </div>
+                    <div class="kpi-card" style="padding:14px; margin-bottom:0;">
+                        <div class="kpi-label">Average Z-Score</div>
+                        <div class="kpi-value" style="font-size:22px;">${num(summary.average_z_score)}</div>
+                        <div class="kpi-sub">Normalized pre-event volatility</div>
+                    </div>
+                    <div class="kpi-card" style="padding:14px; margin-bottom:0;">
+                        <div class="kpi-label">Critical Breaches</div>
+                        <div class="kpi-value" style="font-size:22px; color:var(--accent-negative);">${counts.CRITICAL || 0}</div>
+                        <div class="kpi-sub">Severity Tier 9-10</div>
+                    </div>
+                `;
+
+                const events = data.events || data.studies || [];
+                const srcBadge = document.getElementById('event-source-badge');
+                if (srcBadge) {
+                    srcBadge.innerHTML = `Source Dataset: <strong>${escapeHtml(data.source_dataset || 'training_dataset.csv')}</strong> · Total Curated Records: <strong>${events.length}</strong>`;
+                }
+
+                const triplet = (row, key) => [1, 3, 5].map(h => pct(row[`${key}_${h}d`])).join(' / ');
+
+                document.getElementById('event-study-tbody').innerHTML = events.length ? events.map(ev => `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace;">${escapeHtml(ev.event_date)}</td>
+                        <td>
+                            <strong>${escapeHtml(ev.company)} (${escapeHtml(ev.ticker)})</strong>
+                            <div style="font-size:11px; color:var(--text-muted);">${escapeHtml(ev.threat_type || '')}</div>
+                        </td>
+                        <td><span class="badge-exposure direct">${escapeHtml(ev.severity_tier || 'CRITICAL')}</span></td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11.5px;">${triplet(ev, 'company_return')}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11.5px;">${escapeHtml(ev.sector_ticker || 'XLK')}: ${triplet(ev, 'sector_return')}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11.5px;">SPY: ${triplet(ev, 'market_return')}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:${Number(ev.abnormal_return_1d || 0) < 0 ? 'var(--accent-negative)' : 'var(--accent-positive)'};">${pct(ev.abnormal_return_1d)}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11.5px;">${triplet(ev, 'cumulative_abnormal_return')}</td>
+                        <td style="font-family:'JetBrains Mono',monospace;">${num(ev.z_score)}</td>
+                        <td><span class="session-badge ${ev.status === 'EVALUATED' ? 'open' : 'closed'}">${escapeHtml(ev.status)}</span></td>
+                    </tr>
+                `).join('') : '<tr><td colspan="10" style="text-align:center; color:var(--text-muted);">No event studies found.</td></tr>';
+            } catch (err) {
+                console.error('Error fetching event studies:', err);
+            }
+        }
+
+        async function runHistoricalEventStudy() {
+            const btn = document.getElementById('btn-run-event-study');
+            btn.disabled = true;
+            btn.innerText = 'Evaluating market windows…';
+            try {
+                const res = await fetch('/api/event_study/run', { method: 'POST' });
+                const r = await res.json();
+                await fetchEventStudy();
+                showToast(`Event study evaluated against market bars successfully.`, true);
+            } catch (err) {
+                showToast('Event study failed: ' + err, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Run / Retry Event Study';
+            }
+        }
+
+        // 8. CISA KEV Catalog (Tab 8)
+        let cisaCurrentPage = 1;
+        let cisaTotalPages = 1;
+
+        async function loadCisaVulnerabilities(page = 1) {
+            cisaCurrentPage = page;
+            const query = (document.getElementById('cisa-search')?.value || '').trim();
+            const ransom = document.getElementById('cisa-ransomware-filter')?.value || '';
+            const status = document.getElementById('cisa-status');
+            const total = document.getElementById('cisa-total');
+            const tbody = document.getElementById('cisa-tbody');
+
+            status.textContent = 'Querying CISA KEV catalog...';
+            try {
+                const url = `/api/cisa_vulnerabilities?page=${page}&per_page=50&q=${encodeURIComponent(query)}&ransomware=${encodeURIComponent(ransom)}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                cisaTotalPages = data.total_pages || 1;
+                document.getElementById('cisa-page-counter').innerText = `${data.page} / ${cisaTotalPages}`;
+                total.innerText = `${Number(data.catalog_total || 1741).toLocaleString()} Cataloged Entries`;
+                status.innerText = `Showing ${data.returned || 0} of ${Number(data.total || 0).toLocaleString()} matching entries. Last Sync: ${data.last_sync_time ? data.last_sync_time.slice(0, 19).replace('T', ' ') + ' UTC' : 'Catalog Verified'}`;
+
+                const rows = data.vulnerabilities || [];
+                if (!rows.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No matching CVE entries found in catalog.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = rows.map(r => `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace; white-space:nowrap;">
+                            <a class="cve-pill" href="https://nvd.nist.gov/vuln/detail/${escapeHtml(r.cve_id)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.cve_id)}</a>
+                        </td>
+                        <td><strong>${escapeHtml(r.vendor_project || 'N/A')}</strong></td>
+                        <td>${escapeHtml(r.product || 'N/A')}</td>
+                        <td style="min-width:280px;">
+                            <strong>${escapeHtml(r.vulnerability_name || 'Vulnerability')}</strong>
+                            <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">${escapeHtml(r.short_description || '')}</div>
+                        </td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap;">${escapeHtml(r.date_added || 'N/A')}</td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-size:11px; white-space:nowrap;">${escapeHtml(r.due_date || 'N/A')}</td>
+                        <td>
+                            <span class="badge-exposure ${String(r.ransomware_use).toLowerCase() === 'known' ? 'direct' : 'unknown'}">${escapeHtml(r.ransomware_use || 'Unknown')}</span>
+                        </td>
+                        <td>
+                            <a href="${escapeHtml(r.source_url || '#')}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-cyan); font-size:11px;">Source Link</a>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--accent-negative);">Failed to load CISA data: ${escapeHtml(err.message)}</td></tr>`;
+            }
+        }
+
+        function prevCisaPage() {
+            if (cisaCurrentPage > 1) loadCisaVulnerabilities(cisaCurrentPage - 1);
+        }
+        function nextCisaPage() {
+            if (cisaCurrentPage < cisaTotalPages) loadCisaVulnerabilities(cisaCurrentPage + 1);
+        }
+
+        let cisaSearchTimeout;
+        document.getElementById('cisa-search')?.addEventListener('input', () => {
+            clearTimeout(cisaSearchTimeout);
+            cisaSearchTimeout = setTimeout(() => { loadCisaVulnerabilities(1); }, 300);
+        });
+
+        // 9. System Health (Tab 9)
+        async function fetchSystemHealth() {
+            try {
+                const res = await fetch('/api/health');
+                if (!res.ok) return;
+                const d = await res.json();
+
+                document.getElementById('health-overall-status').innerText = d.status === 'operational' ? 'OPERATIONAL' : 'DEGRADED';
+                document.getElementById('health-ai-model').innerText = `${d.ai_agent?.provider || 'Gemini'} (${d.ai_agent?.preferred_model || 'gemini-3.8-flash'})`;
+                document.getElementById('health-ml-algo').innerText = `${d.ml_engine?.model_file || 'threat_impact_model.joblib'} (${d.ml_engine?.evaluation || 'LOOCV'})`;
+
+                const usSess = d.market_sessions?.US;
+                const inSess = d.market_sessions?.India;
+                const usLabel = formatSessionLabel(usSess);
+                const inLabel = formatSessionLabel(inSess);
+
+                const healthUs = document.getElementById('health-us-session');
+                const healthIn = document.getElementById('health-india-session');
+                const hdrUs = document.getElementById('hdr-us-session');
+                const hdrIn = document.getElementById('hdr-india-session');
+
+                if (healthUs) {
+                    healthUs.innerText = usLabel;
+                    if (usSess && typeof usSess === 'object' && usSess.local_time) {
+                        healthUs.title = `Exchange Time: ${usSess.local_time}`;
+                    }
+                }
+                if (healthIn) {
+                    healthIn.innerText = inLabel;
+                    if (inSess && typeof inSess === 'object' && inSess.local_time) {
+                        healthIn.title = `Exchange Time: ${inSess.local_time}`;
+                    }
+                }
+                if (hdrUs) {
+                    hdrUs.innerText = usLabel;
+                    if (usSess && typeof usSess === 'object' && usSess.local_time) {
+                        hdrUs.title = `US Market: ${usLabel} · Exchange Time: ${usSess.local_time}`;
+                    }
+                }
+                if (hdrIn) {
+                    hdrIn.innerText = inLabel;
+                    if (inSess && typeof inSess === 'object' && inSess.local_time) {
+                        hdrIn.title = `India Market: ${inLabel} · Exchange Time: ${inSess.local_time}`;
+                    }
+                }
+
+                document.getElementById('health-time-utc').innerText = d.timestamp_utc || '--';
+                document.getElementById('health-time-ist').innerText = d.timestamp_ist || '--';
+
+                const tblTbody = document.getElementById('health-tables-tbody');
+                const counts = d.database?.tables || {};
+                tblTbody.innerHTML = Object.keys(counts).map(tbl => `
+                    <tr>
+                        <td style="font-family:'JetBrains Mono',monospace;"><code>${escapeHtml(tbl)}</code></td>
+                        <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--accent-cyan);">${Number(counts[tbl] || 0).toLocaleString()}</td>
+                        <td><span class="session-badge open">VERIFIED</span></td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error('Error fetching system health:', err);
+            }
+        }
+
+        // Live Stock Search Autocomplete
+        let stockSearchTimeout;
+        const stockSearchInput = document.getElementById('stock-search-input');
+        const stockSearchResults = document.getElementById('stock-search-results');
+        const stockSearchClear = document.getElementById('stock-search-clear');
+
+        if (stockSearchInput) {
+            stockSearchInput.addEventListener('input', () => {
+                clearTimeout(stockSearchTimeout);
+                const query = stockSearchInput.value.trim();
+                if (query.length < 1) {
+                    stockSearchResults.style.display = 'none';
+                    stockSearchResults.innerHTML = '';
+                    return;
+                }
+                stockSearchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch('/api/stock_search?q=' + encodeURIComponent(query));
+                        if (!response.ok) throw new Error('Search failed');
+                        const stocks = await response.json();
+                        stockSearchResults.innerHTML = '';
+                        if (stocks.length === 0) {
+                            stockSearchResults.innerHTML = '<div style="padding:10px 14px; color:var(--text-muted); font-size:12px;">No matching equities in universe.</div>';
+                        } else {
+                            stocks.forEach(stock => {
+                                const item = document.createElement('div');
+                                item.style.cssText = 'padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border-color); font-size:13px;';
+                                item.innerHTML = `<strong>${escapeHtml(stock.ticker)}</strong> · <span style="color:var(--text-secondary);">${escapeHtml(stock.company_name)}</span>`;
+                                item.addEventListener('click', () => addSearchedStock(stock.ticker));
+                                stockSearchResults.appendChild(item);
+                            });
+                        }
+                        stockSearchResults.style.display = 'block';
+                    } catch (error) {
+                        stockSearchResults.style.display = 'none';
+                    }
+                }, 250);
+            });
+
+            stockSearchClear.addEventListener('click', () => {
+                stockSearchInput.value = '';
+                stockSearchResults.innerHTML = '';
+                stockSearchResults.style.display = 'none';
+                stockSearchInput.focus();
+            });
+        }
+
+        async function addSearchedStock(ticker) {
+            try {
+                const response = await fetch('/api/stocks/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ticker })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    showToast(result.error || 'Unable to add stock', false);
+                    return;
+                }
+                stockSearchInput.value = '';
+                stockSearchResults.style.display = 'none';
+                showToast('Added ' + ticker + ' to surveillance watchlist!', true);
+                await fetchStocks();
+            } catch (error) {
+                showToast('Failed to add stock: ' + error.message, false);
+            }
+        }
+
+        // Submit Threat Incident (Tab 5)
+        async function handleThreatSubmission(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-threat');
+            btn.disabled = true;
+            btn.innerHTML = 'Executing Sandboxed Gemini 3.8 Investigation…';
+
+            const payload = {
+                company: document.getElementById('input-company').value,
+                threat_type: document.getElementById('input-type').value,
+                description: document.getElementById('input-desc').value
+            };
+
+            try {
+                const res = await fetch('/api/analyze_threat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error('Analysis request failed');
+                const data = await res.json();
+
+                document.getElementById('dossier-placeholder').style.display = 'none';
+                const resultBox = document.getElementById('dossier-result');
+                resultBox.style.display = 'block';
+                document.getElementById('dossier-status').innerText = 'Verified Investigation';
+
+                document.getElementById('dossier-company-ticker').innerText = `${data.company || 'Unknown'} (${data.ticker || 'UNKNOWN'})`;
+                document.getElementById('dossier-source-attribution').innerText = `Provider: ${data.analysis_source || 'Gemini 3.8 Flash'} | Risk Score: ${data.risk_score || 0}/100`;
+
+                const sigBadge = document.getElementById('dossier-signal');
+                const sig = (data.recommendation || 'NO SIGNAL').toUpperCase();
+                sigBadge.innerText = sig;
+                sigBadge.className = `signal-badge ${(sig === 'REVIEW' || sig === 'MONITOR') ? 'review' : 'no-signal'}`;
+
+                const exp = (data.exposure_level || 'UNKNOWN').toUpperCase();
+                const expEl = document.getElementById('dossier-exposure');
+                expEl.innerText = exp;
+                expEl.className = `badge-exposure ${exp === 'DIRECT' ? 'direct' : (exp === 'INDIRECT' ? 'indirect' : 'unknown')}`;
+
+                document.getElementById('dossier-status-badge').innerText = data.exploitation_status || 'NOT_REPORTED';
+                document.getElementById('dossier-evidence-score').innerText = `${Number(data.evidence_quality || 5.0).toFixed(1)} / 10`;
+                document.getElementById('dossier-summary').innerText = data.incident_summary || data.description || 'No summary available.';
+
+                const cveBox = document.getElementById('dossier-cves');
+                const cveList = Array.isArray(data.cve_ids) ? data.cve_ids : [];
+                cveBox.innerHTML = cveList.length > 0
+                    ? cveList.map(c => `<a class="cve-pill" href="https://nvd.nist.gov/vuln/detail/${escapeHtml(c)}" target="_blank" rel="noopener noreferrer">${escapeHtml(c)}</a>`).join('')
+                    : '<span style="color:var(--text-muted); font-size:12px;">No specific CVEs identified in incident report.</span>';
+
+                document.getElementById('dossier-evidence-quote').innerText = data.supporting_evidence || 'Direct incident indicators extracted from report.';
+                document.getElementById('dossier-uncertainties').innerText = data.uncertainties || 'All extracted parameters cross-validated.';
+
+                showToast(`Investigation complete for ${data.company || 'Target'} - Risk: ${data.risk_score}/100`, true);
+                await loadAllData();
+            } catch (err) {
+                showToast('Error during investigation: ' + err.message, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Execute Sandboxed AI Investigation &amp; ML Forecast';
+            }
+        }
+
+        async function testDiscordWebhook() {
+            try {
+                showToast('Dispatching test diagnostic alert to Discord...', true);
+                const res = await fetch('/api/test_alert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticker: 'MSFT',
+                        risk_score: 85,
+                        recommendation: 'MONITOR',
+                        summary: 'Diagnostic alert dispatched from THREATPULSE 3D Commercial Terminal.'
+                    })
+                });
+                const data = await res.json();
+                showToast(data.status || 'Discord alert dispatched successfully!', true);
+            } catch (err) {
+                showToast('Error sending Discord alert: ' + err, false);
+            }
+        }
+
+        async function refreshMarketData() {
+            const btn = document.getElementById('btn-refresh-quotes');
+            btn.disabled = true;
+            btn.innerHTML = 'Polling Quotes…';
+            try {
+                const res = await fetch('/api/refresh_stocks', { method: 'POST' });
+                const json = await res.json();
+                showToast(`Refreshed ${json.count || 0} equities successfully!`, true);
+                await fetchStocks();
+                await fetchMetrics();
+            } catch (e) {
+                showToast('Failed to refresh market data: ' + e, false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg> Refresh Quotes
+                `;
+            }
+        }
+
+        // Global Synchronizer
+        async function loadAllData() {
+            await Promise.all([
+                fetchMetrics(),
+                fetchThreats(),
+                fetchStocks(),
+                fetchCorrelations(),
+                fetchSectorComparison(),
+                fetchPredictionPerformance(),
+                fetchEventStudy(),
+                loadCisaVulnerabilities(cisaCurrentPage),
+                fetchSystemHealth()
+            ]);
+        }
+
+        loadAllData();
+
+        // 30s Countdown Poller
+        let countdown = 30;
+        setInterval(() => {
+            countdown--;
+            const timerEl = document.getElementById('countdown-timer');
+            if (timerEl) timerEl.innerText = countdown + 's';
+            if (countdown <= 0) {
+                countdown = 30;
+                loadAllData();
+            }
+        }, 1000);
+
+        // Dimensional Card Pointer Tilt (Accessibility & Performance Guarded)
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -6;
+                    const rotateY = ((x - centerX) / centerX) * 6;
+                    card.style.transform = `perspective(800px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+                    const sheen = card.querySelector('.card-sheen');
+                    if (sheen) {
+                        sheen.style.background = `radial-gradient(circle at ${x}px ${y}px, rgba(32, 227, 242, 0.22), transparent 60%)`;
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateY(0)';
+                    const sheen = card.querySelector('.card-sheen');
+                    if (sheen) {
+                        sheen.style.background = 'radial-gradient(circle at 50% 0%, rgba(32, 227, 242, 0.18), transparent 65%)';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

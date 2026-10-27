@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Depth -->
+    <radialGradient id="radarBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#131F30" stop-opacity="0.9" />
+      <stop offset="70%" stop-color="#0E1522" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#070B12" stop-opacity="1" />
+    </radialGradient>
+
+    <!-- Electric Cyan Gradient -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#20E3F2" />
+      <stop offset="70%" stop-color="#4287FF" />
+      <stop offset="100%" stop-color="#8964FF" />
+    </linearGradient>
+
+    <!-- Radar Sweep Glow Gradient -->
+    <linearGradient id="sweepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#20E3F2" stop-opacity="0" />
+      <stop offset="70%" stop-color="#20E3F2" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Subtle Glow Filter -->
+    <filter id="radarGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Outer Circular Base -->
+  <circle cx="50" cy="50" r="46" fill="url(#radarBg)" stroke="#293A50" stroke-width="1.5" />
+
+  <!-- Concentric Range Rings -->
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#1B283A" stroke-width="1" stroke-dasharray="2 3" />
+  <circle cx="50" cy="50" r="28" fill="none" stroke="#223348" stroke-width="1" />
+  <circle cx="50" cy="50" r="18" fill="none" stroke="#293A50" stroke-width="1" stroke-dasharray="3 3" />
+  <circle cx="50" cy="50" r="8" fill="none" stroke="#20E3F2" stroke-width="1" stroke-opacity="0.4" />
+
+  <!-- Radar Cardinal Axis Ticks -->
+  <line x1="50" y1="4" x2="50" y2="14" stroke="#20E3F2" stroke-width="1.8" stroke-linecap="round" />
+  <line x1="50" y1="86" x2="50" y2="96" stroke="#20E3F2" stroke-width="1.8" stroke-linecap="round" />
+  <line x1="4" y1="50" x2="14" y2="50" stroke="#20E3F2" stroke-width="1.8" stroke-linecap="round" />
+  <line x1="86" y1="50" x2="96" y2="50" stroke="#20E3F2" stroke-width="1.8" stroke-linecap="round" />
+
+  <!-- Diagonal Sub-ticks -->
+  <line x1="20" y1="20" x2="25" y2="25" stroke="#293A50" stroke-width="1" />
+  <line x1="80" y1="20" x2="75" y2="25" stroke="#293A50" stroke-width="1" />
+  <line x1="20" y1="80" x2="25" y2="75" stroke="#293A50" stroke-width="1" />
+  <line x1="80" y1="80" x2="75" y2="75" stroke="#293A50" stroke-width="1" />
+
+  <!-- Geometric Radar Eye Aperture (Almond Outline) -->
+  <path d="M12 50 C26 26, 74 26, 88 50 C74 74, 26 74, 12 50 Z"
+        fill="rgba(20, 34, 54, 0.45)"
+        stroke="url(#cyanGrad)"
+        stroke-width="2.2"
+        stroke-linejoin="round"
+        filter="url(#radarGlow)" />
+
+  <!-- Radar Sweep Cone (Simulated 45-degree Scan Slice) -->
+  <path d="M50 50 L77 23 A38 38 0 0 1 88 50 Z"
+        fill="url(#sweepGrad)"
+        opacity="0.35" />
+
+  <!-- Inner Iris Ring -->
+  <circle cx="50" cy="50" r="14" fill="none" stroke="#20E3F2" stroke-width="1.5" stroke-opacity="0.6" />
+
+  <!-- Central Real-Time Financial Signal Pulse Waveform -->
+  <path d="M14 50 L32 50 L37 36 L43 64 L49 26 L55 70 L61 40 L66 50 L86 50"
+        fill="none"
+        stroke="#FFFFFF"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#radarGlow)" />
+
+  <!-- Signal Peak Nodes -->
+  <circle cx="49" cy="26" r="2.4" fill="#20E3F2" />
+  <circle cx="55" cy="70" r="2.2" fill="#FF667A" />
+  <circle cx="50" cy="50" r="3.2" fill="#FFFFFF" filter="url(#radarGlow)" />
+</svg>
